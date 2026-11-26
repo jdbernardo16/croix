@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "nuxt dev --port 3030",
     "build": "nuxt build",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview"
+    "generate": "nuxt generate --preset static",
+    "preview": "nuxt preview",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.0",
@@ -19,7 +20,8 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
-    "tailwindcss": "^4.3.5"
+    "tailwindcss": "^4.3.5",
+    "wrangler": "^4.168.0"
   },
   "engines": {
     "node": ">=22"
