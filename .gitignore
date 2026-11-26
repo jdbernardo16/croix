@@ -9,3 +9,5 @@ dist
 .DS_Store
 *.log
 .wrangler
+croix-config.php
+croix-hostinger.zip

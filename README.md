@@ -19,87 +19,90 @@ npm run dev        # http://localhost:3030
 npm run generate   # static build in .output/public
 ```
 
-## Deploy to Cloudflare Workers (free)
+## Deploy to Hostinger (shared hosting)
 
-The app is hosted as a **Workers static-assets site** with one small Worker for the contact form. Cloudflare's build image sets `NITRO_PRESET=cloudflare-module`, so `npm run generate` passes `--preset static` to force a full 36-route prerender. Without that flag the build only emits `/200.html` and `/404.html`, and every page returns 404.
+The site is a fully static Nuxt build. Hostinger serves it from `public_html`; the only server-side code is `public/api/contact.php`, which emails enquiries through Brevo's HTTP API. No Node runtime is needed on the host.
 
-### 1. Repository
-
-The Nuxt app is the repository root (`peg/` is its own git repo). `main` is the production branch.
+### 1. Build the upload package
 
 ```bash
-cd peg
-npm run generate
-npx wrangler deploy --dry-run   # validates worker + assets locally
+npm run package:hostinger
 ```
 
-### 2. Cloudflare Workers Builds settings
+This runs `nuxt generate --preset static` (36 routes) and writes `croix-hostinger.zip` (about 4 MB). The `--preset static` flag matters: without it, a Cloudflare build environment sets `NITRO_PRESET=cloudflare-module` and only two routes are generated.
 
-Dashboard → Workers & Pages → `croix` → Settings → Build:
+### 2. Upload
 
-| Setting | Value |
-|---|---|
-| Production branch | `main` |
-| Build command | `npm run generate` |
-| Deploy command | `npx wrangler deploy` |
-| Root directory | blank (the repo root is the app) |
-| Node version | `22` (`NODE_VERSION=22`; `.nvmrc` is also present) |
+1. hPanel → Files → **File Manager** → open the folder that serves the domain (usually `public_html`).
+2. Delete Hostinger's default `index.html` / `default.php` if present.
+3. Upload `croix-hostinger.zip`, then **Extract** into that folder, then delete the zip.
+4. Confirm `index.html`, `.htaccess`, `api/`, `_nuxt/`, and `work/` sit directly in `public_html` — not inside a nested folder.
+5. In File Manager settings, enable **Show hidden files** so `.htaccess` is visible and editable.
 
-`wrangler.jsonc` supplies the Worker name, entrypoint, and assets directory. Do **not** set a build output directory — this is not a Pages project.
+Hostinger runs LiteSpeed, which reads `.htaccess`. It handles the `/api/contact` rewrite, HTTPS, apex → `www`, the 404 page, cache headers, and compression.
 
-```jsonc
-{
-  "name": "croix",
-  "main": "worker/index.ts",
-  "assets": { "directory": ".output/public", "binding": "ASSETS", "not_found_handling": "404-page" }
-}
-```
+### 3. PHP and the Brevo key
 
-`worker/index.ts` serves static assets from the `ASSETS` binding and routes `POST /api/contact` to the same handler used by `functions/api/contact.ts`.
+1. hPanel → Advanced → **PHP Configuration** → select PHP 8.1 or newer. The endpoint needs the cURL extension, which Hostinger enables by default.
+2. Create the config **one level above `public_html`**, next to it in the domain folder:
 
-### 3. Runtime environment variables
+   ```
+   /home/uXXXXXXXX/domains/croixlighting.com.ph/croix-config.php
+   /home/uXXXXXXXX/domains/croixlighting.com.ph/public_html/...
+   ```
 
-These are **runtime** secrets on the Worker, not build variables. Workers & Pages → `croix` → Settings → Variables and Secrets → add for Production:
+   Use `deploy/hostinger/croix-config.example.php` as the template:
 
-| Name | Value |
-|---|---|
-| `BREVO_API_KEY` | Brevo API key starting with `xkeysib-` (secret) |
-| `CONTACT_TO` | `info@croixlighting.com.ph` (optional) |
-| `CONTACT_FROM` | a verified Brevo sender, e.g. `website@croixlighting.com.ph` (optional) |
+   ```php
+   <?php
+   return [
+       'BREVO_API_KEY' => 'xkeysib-...',
+       'CONTACT_TO' => 'info@croixlighting.com.ph',
+       'CONTACT_FROM' => 'website@croixlighting.com.ph',
+   ];
+   ```
 
-`BREVO_API_KEY` is not the SMTP key. See **Contact email (Brevo)** below. Without it the form returns a 503 and shows the studio email address instead.
+3. In Brevo: Settings → SMTP & API → **API keys** → create a key. It starts with `xkeysib-`. The SMTP key (`xsmtpsib-…`) will not work with the HTTP API.
+4. Verify `website@croixlighting.com.ph` (or whichever `CONTACT_FROM` you use) under Brevo → Senders & Domains.
+5. **Revoke the SMTP key that was shared in chat.** Treat it as compromised.
 
-### 4. First deploy
+If `croix-config.php` is missing, the form returns a 503 and tells the visitor to email the studio directly. The endpoint also refuses to serve that file if it ever ends up inside the webroot.
 
-Deploy, then check:
+### 4. SSL and domain
+
+1. hPanel → Security → **SSL** → install the free certificate for the domain and `www`.
+2. `.htaccess` already forces HTTPS and redirects `croixlighting.com.ph` → `https://www.croixlighting.com.ph`.
+3. If the final domain is not `www.croixlighting.com.ph`, update `public/.htaccess`, `public/robots.txt`, and `public/sitemap.xml`, then rebuild.
+
+### 5. Test after upload
 
 - `/` and `/work`
 - `/work/cultural-center-philippines` and `/work/arena-di-verona`
 - `/studio` and `/studio/team`
 - `/services`
-- `/contact` — submit a real enquiry; check the Brevo log and the Worker log (`wrangler tail croix`)
-- `/privacy`, `/terms`, and a missing URL for the 404
+- `/contact` — submit a real enquiry; check the inbox and the Brevo transactional log
+- `/privacy`, `/terms`, and a missing URL (should show the CROIX 404, status 404)
+- `https://` and the apex redirect
 
-`_headers`, `sitemap.xml`, `robots.txt`, and `favicon.png` are served from `.output/public`. The `/pegs` route is unlinked, noindexed, and `X-Robots-Tag: noindex, nofollow`.
+### 6. Updating the site
 
-### 5. Custom domain
+Rebuild and re-upload:
 
-1. Worker → Settings → Domains & Routes → add `www.croixlighting.com.ph` and `croixlighting.com.ph`.
-2. If the domain is already on Cloudflare, the DNS records are created automatically. If not, move the nameservers to Cloudflare or add the CNAME at the registrar.
-3. Set `www` as the primary and add a Redirect Rule: apex → `https://www.croixlighting.com.ph/$1` (301).
-4. SSL/TLS → **Full (strict)**, and enable **Always Use HTTPS**.
-5. If the final domain is not `www.croixlighting.com.ph`, update `public/robots.txt` and `public/sitemap.xml` before deploying.
+```bash
+npm run package:hostinger
+```
 
-### 6. Free-tier notes
+Upload the zip, extract over the existing files, delete the zip. `croix-config.php` lives outside `public_html`, so it survives. Hashed `_nuxt/` assets are cached for a year; old ones can be removed after a deploy.
 
-- Workers static assets: free and unlimited requests.
-- Worker requests: 100,000/day on the free plan — only `/api/contact` and missing paths invoke it.
-- Brevo: 300 emails/day on the free plan.
-- Remove `app/pages/pegs.vue` and the `public/img/pegs/` folder before launch if you do not want the internal review board deployed.
+### Notes
 
-### Alternative: Cloudflare Pages
+- `public/_headers` is Cloudflare-only and is ignored by LiteSpeed. `.htaccess` is the Hostinger equivalent.
+- `/pegs` is unlinked and noindexed, but it is still uploaded. Delete `pegs/` from `public_html` (or remove `app/pages/pegs.vue` before building) if you do not want the internal review board public.
+- Shared hosting has no Node process, so the Cloudflare Worker in `worker/` is unused here. It stays in the repo only for the optional Cloudflare deploy below.
 
-Pages also works without `wrangler.jsonc` or `worker/`: build `npm run generate`, output `.output/public`, and let Pages pick up `functions/api/contact.ts`. Set the same three variables as Pages environment variables. The Pages build image does not set `NITRO_PRESET`, so `npm run generate` is enough there.
+### Alternative: Cloudflare Workers
+
+`wrangler.jsonc` + `worker/index.ts` still deploy the same static build to Workers, with `/api/contact` handled by the Worker instead of PHP. Build command `npm run generate`, deploy command `npx wrangler deploy`, and add `BREVO_API_KEY`, `CONTACT_TO`, `CONTACT_FROM` as Worker runtime variables. `functions/api/contact.ts` keeps the Pages route working too.
 
 ## Structure
 
@@ -115,9 +118,12 @@ worker/
 functions/api/    Pages-compatible contact handler
 wrangler.jsonc    Workers config (name, entry, assets)
 public/
+  .htaccess       Hostinger: rewrites, HTTPS, 404, cache headers
+  api/contact.php Brevo contact endpoint (PHP, no Composer)
   img/            logo, hero, project and reference imagery
-  _headers        Cloudflare security/cache headers
+  _headers        Cloudflare-only headers (ignored by LiteSpeed)
   robots.txt      /pegs excluded
+deploy/hostinger/ croix-config.example.php
 ```
 
 ## Design thesis
@@ -168,7 +174,7 @@ Primary references:
 
 ## Contact email (Brevo)
 
-The contact form posts to `/api/contact`, handled by `worker/index.ts` on Workers (or `functions/api/contact.ts` on Pages). Both call the same handler and send through Brevo's **HTTP API**. Neither static hosting model can run SMTP or `nodemailer`.
+The contact form posts to `/api/contact`: `public/api/contact.php` on Hostinger, `worker/index.ts` on Cloudflare Workers, or `functions/api/contact.ts` on Cloudflare Pages. All three send through Brevo's **HTTP API**; none uses SMTP or `nodemailer`.
 
 1. **Revoke the SMTP key that was shared in chat.** Treat it as compromised.
 2. In Brevo: Settings → SMTP & API → **API keys** → create a key. It starts with `xkeysib-`. The SMTP key (`xsmtpsib-…`) will not work with the HTTP API.

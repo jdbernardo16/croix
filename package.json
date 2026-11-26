@@ -7,7 +7,8 @@
     "build": "nuxt build",
     "generate": "nuxt generate --preset static",
     "preview": "nuxt preview",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "package:hostinger": "npm run generate && cd .output/public && rm -f ../../croix-hostinger.zip && zip -qr ../../croix-hostinger.zip ."
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.0",
