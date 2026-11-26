@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /pegs
+
+Sitemap: https://www.croixlighting.com.ph/sitemap.xml
