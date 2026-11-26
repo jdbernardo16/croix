@@ -122,6 +122,7 @@ foreach ($configCandidates as $configPath) {
 $apiKey = (string) ($config['BREVO_API_KEY'] ?? (getenv('BREVO_API_KEY') ?: ''));
 $contactTo = (string) ($config['CONTACT_TO'] ?? (getenv('CONTACT_TO') ?: 'info@croixlighting.com.ph'));
 $contactFrom = (string) ($config['CONTACT_FROM'] ?? (getenv('CONTACT_FROM') ?: 'website@croixlighting.com.ph'));
+$debug = (bool) ($config['DEBUG'] ?? false);
 
 $raw = file_get_contents('php://input');
 $data = json_decode(is_string($raw) ? $raw : '', true);
@@ -248,10 +249,21 @@ $payload = json_encode([
 
 if ($status < 200 || $status >= 300) {
     error_log('CROIX contact: Brevo HTTP ' . $status . ' ' . $transportError . ' ' . substr($responseBody, 0, 500));
-    respond(502, [
+
+    $failure = [
         'ok' => false,
         'error' => 'The email service rejected the message. Please try again.',
-    ]);
+    ];
+
+    if ($debug) {
+        $failure['brevo_status'] = $status;
+        $failure['brevo_message'] = substr($responseBody, 0, 500);
+        if ($transportError !== '') {
+            $failure['transport_error'] = $transportError;
+        }
+    }
+
+    respond(502, $failure);
 }
 
 respond(200, ['ok' => true]);

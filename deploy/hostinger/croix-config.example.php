@@ -16,4 +16,6 @@ return [
     'BREVO_API_KEY' => 'xkeysib-REPLACE_WITH_YOUR_BREVO_API_KEY',
     'CONTACT_TO' => 'info@croixlighting.com.ph',
     'CONTACT_FROM' => 'website@croixlighting.com.ph',
+    // Set true temporarily to see Brevo's exact rejection in the form response.
+    'DEBUG' => false,
 ];

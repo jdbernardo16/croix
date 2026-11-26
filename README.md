@@ -108,6 +108,22 @@ If `croix-config.php` is missing, the form returns a 503 and tells the visitor t
 - `/privacy`, `/terms`, and a missing URL (should show the CROIX 404, status 404)
 - `https://` and the apex redirect
 
+### Troubleshooting the contact form
+
+The form distinguishes the two failure points:
+
+- **503** — `croix-config.php` was not found or `BREVO_API_KEY` is empty. Fix the config path.
+- **502** — the endpoint reached Brevo, but Brevo rejected the message.
+
+For a 502, check hPanel → Advanced → **Error Logs** for a line starting `CROIX contact: Brevo HTTP`. The usual causes:
+
+- The key is the SMTP key (`xsmtpsib-…`). The HTTP API needs an API key (`xkeysib-…`).
+- `CONTACT_FROM` is not a verified sender. Verify it under Brevo → Senders & Domains, or use an address that is already verified.
+- The API key has an IP restriction. Edit the key in Brevo and remove the restriction, or allow the Hostinger server IP.
+- The Brevo account is not activated, or sending is suspended.
+
+To see the exact response without opening the log, set `'DEBUG' => true` in `croix-config.php`, submit once, then set it back to `false`. The JSON will include `brevo_status` and `brevo_message`.
+
 ### 7. Updating the site
 
 Rebuild and re-upload:
