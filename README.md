@@ -21,7 +21,7 @@ npm run generate   # static build in .output/public
 
 ## Deploy to Hostinger (shared hosting)
 
-The site is a fully static Nuxt build. Hostinger serves it from `public_html`; the only server-side code is `public/api/contact.php`, which emails enquiries through Brevo's HTTP API. No Node runtime is needed on the host.
+The site is a fully static Nuxt build. Hostinger serves it from the folder mapped to the domain or subdomain; the only server-side code is `public/api/contact.php`, which emails enquiries through Brevo's HTTP API. No Node runtime is needed on the host.
 
 ### 1. Build the upload package
 
@@ -33,25 +33,47 @@ This runs `nuxt generate --preset static` (36 routes) and writes `croix-hostinge
 
 ### 2. Upload
 
-1. hPanel → Files → **File Manager** → open the folder that serves the domain (usually `public_html`).
+1. hPanel → Files → **File Manager** → open the document root for the site:
+   - main domain: usually `public_html`
+   - subdomain: the folder hPanel shows for it, e.g. `public_html/__croix`
 2. Delete Hostinger's default `index.html` / `default.php` if present.
 3. Upload `croix-hostinger.zip`, then **Extract** into that folder, then delete the zip.
-4. Confirm `index.html`, `.htaccess`, `api/`, `_nuxt/`, and `work/` sit directly in `public_html` — not inside a nested folder.
+4. Confirm `index.html`, `.htaccess`, `api/`, `_nuxt/`, and `work/` sit directly in the document root — not inside a nested folder.
 5. In File Manager settings, enable **Show hidden files** so `.htaccess` is visible and editable.
 
 Hostinger runs LiteSpeed, which reads `.htaccess`. It handles the `/api/contact` rewrite, HTTPS, apex → `www`, the 404 page, cache headers, and compression.
 
-### 3. PHP and the Brevo key
+### 3. Subdomain or subfolder install
+
+For a subdomain such as `https://croix.project-uat.online/` whose docroot is `/public_html/__croix/`:
+
+- Extract the zip into `public_html/__croix/`, **not** into `public_html/`. The folder name is only the docroot; the URL is the subdomain root, so no `baseURL` change is needed.
+- Put `croix-config.php` **inside `__croix/`**, next to `index.html`. The bundled `.htaccess` denies direct requests to it and PHP never prints its contents. One level above `__croix` is the main site's `public_html`, so do not put the key there.
+- `.htaccess` needs no edits: the API rewrite is relative, and the apex → `www` rule only fires for `croixlighting.com.ph`.
+- Install a separate SSL certificate for the subdomain in hPanel.
+- This is a UAT host, so keep it out of search results: append `deploy/hostinger/uat-noindex.conf` to `.htaccess` and replace `robots.txt` with `deploy/hostinger/uat-robots.txt`. Remove both for production.
+- `sitemap.xml` still lists the production URLs. That is fine while the UAT site is noindexed; regenerate it with the real host before a production subdomain launch.
+
+If the site is served from a **subfolder of a URL** (e.g. `https://example.com/croix/`) instead of a subdomain, set `app.baseURL = '/croix/'` in `nuxt.config.ts` and rebuild.
+
+### 4. PHP and the Brevo key
 
 1. hPanel → Advanced → **PHP Configuration** → select PHP 8.1 or newer. The endpoint needs the cURL extension, which Hostinger enables by default.
-2. Create the config **one level above `public_html`**, next to it in the domain folder:
+2. Create `croix-config.php` using `deploy/hostinger/croix-config.example.php`:
+
+   **Main domain** — one level above `public_html`:
 
    ```
    /home/uXXXXXXXX/domains/croixlighting.com.ph/croix-config.php
    /home/uXXXXXXXX/domains/croixlighting.com.ph/public_html/...
    ```
 
-   Use `deploy/hostinger/croix-config.example.php` as the template:
+   **Subdomain** — inside the subdomain docroot (protected by `.htaccess`):
+
+   ```
+   /home/uXXXXXXXX/domains/project-uat.online/public_html/__croix/croix-config.php
+   /home/uXXXXXXXX/domains/project-uat.online/public_html/__croix/index.html
+   ```
 
    ```php
    <?php
@@ -62,19 +84,21 @@ Hostinger runs LiteSpeed, which reads `.htaccess`. It handles the `/api/contact`
    ];
    ```
 
+   For UAT, point `CONTACT_TO` at your own inbox so test enquiries do not reach the client.
+
 3. In Brevo: Settings → SMTP & API → **API keys** → create a key. It starts with `xkeysib-`. The SMTP key (`xsmtpsib-…`) will not work with the HTTP API.
 4. Verify `website@croixlighting.com.ph` (or whichever `CONTACT_FROM` you use) under Brevo → Senders & Domains.
 5. **Revoke the SMTP key that was shared in chat.** Treat it as compromised.
 
-If `croix-config.php` is missing, the form returns a 503 and tells the visitor to email the studio directly. The endpoint also refuses to serve that file if it ever ends up inside the webroot.
+If `croix-config.php` is missing, the form returns a 503 and tells the visitor to email the studio directly.
 
-### 4. SSL and domain
+### 5. SSL and domain
 
-1. hPanel → Security → **SSL** → install the free certificate for the domain and `www`.
+1. hPanel → Security → **SSL** → install the free certificate for the domain (or the subdomain) and `www` where applicable.
 2. `.htaccess` already forces HTTPS and redirects `croixlighting.com.ph` → `https://www.croixlighting.com.ph`.
-3. If the final domain is not `www.croixlighting.com.ph`, update `public/.htaccess`, `public/robots.txt`, and `public/sitemap.xml`, then rebuild.
+3. If the production domain is not `www.croixlighting.com.ph`, update `public/.htaccess`, `public/robots.txt`, and `public/sitemap.xml`, then rebuild.
 
-### 5. Test after upload
+### 6. Test after upload
 
 - `/` and `/work`
 - `/work/cultural-center-philippines` and `/work/arena-di-verona`
@@ -84,7 +108,7 @@ If `croix-config.php` is missing, the form returns a 503 and tells the visitor t
 - `/privacy`, `/terms`, and a missing URL (should show the CROIX 404, status 404)
 - `https://` and the apex redirect
 
-### 6. Updating the site
+### 7. Updating the site
 
 Rebuild and re-upload:
 
@@ -92,12 +116,12 @@ Rebuild and re-upload:
 npm run package:hostinger
 ```
 
-Upload the zip, extract over the existing files, delete the zip. `croix-config.php` lives outside `public_html`, so it survives. Hashed `_nuxt/` assets are cached for a year; old ones can be removed after a deploy.
+Upload the zip, extract over the existing files, delete the zip. `croix-config.php` survives because it is not part of the package. Hashed `_nuxt/` assets are cached for a year; old ones can be removed after a deploy.
 
 ### Notes
 
 - `public/_headers` is Cloudflare-only and is ignored by LiteSpeed. `.htaccess` is the Hostinger equivalent.
-- `/pegs` is unlinked and noindexed, but it is still uploaded. Delete `pegs/` from `public_html` (or remove `app/pages/pegs.vue` before building) if you do not want the internal review board public.
+- `/pegs` is unlinked and noindexed, but it is still uploaded. Delete `pegs/` from the docroot (or remove `app/pages/pegs.vue` before building) if you do not want the internal review board public.
 - Shared hosting has no Node process, so the Cloudflare Worker in `worker/` is unused here. It stays in the repo only for the optional Cloudflare deploy below.
 
 ### Alternative: Cloudflare Workers

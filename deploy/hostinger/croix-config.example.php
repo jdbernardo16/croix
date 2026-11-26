@@ -1,13 +1,16 @@
 <?php
 /**
- * Copy this file to ONE LEVEL ABOVE public_html as `croix-config.php`.
+ * Copy this file to `croix-config.php`:
  *
- * Hostinger layout:
+ * Main domain — one level above public_html:
  *   /home/uXXXXXXXX/domains/croixlighting.com.ph/croix-config.php
  *   /home/uXXXXXXXX/domains/croixlighting.com.ph/public_html/...
  *
- * The site reads it from dirname(public_html/api, 2), so it is never
- * web-accessible. Do not commit the real key to git.
+ * Subdomain — inside the subdomain docroot (denied by .htaccess):
+ *   /home/uXXXXXXXX/domains/project-uat.online/public_html/__croix/croix-config.php
+ *   /home/uXXXXXXXX/domains/project-uat.online/public_html/__croix/index.html
+ *
+ * Do not commit the real key to git.
  */
 return [
     'BREVO_API_KEY' => 'xkeysib-REPLACE_WITH_YOUR_BREVO_API_KEY',

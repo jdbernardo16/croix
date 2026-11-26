@@ -93,12 +93,29 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 $config = [];
-$configPath = dirname(__DIR__, 2) . '/croix-config.php';
+$configCandidates = [];
 
-if (is_file($configPath)) {
+$envConfig = getenv('CROIX_CONFIG');
+if (is_string($envConfig) && $envConfig !== '') {
+    $configCandidates[] = $envConfig;
+}
+
+// Main domain (docroot = public_html): keep the key above the webroot.
+$configCandidates[] = dirname(__DIR__, 2) . '/croix-config.php';
+
+// Subdomain or subfolder (docroot = public_html/__croix): keep it in the
+// docroot; the included .htaccess denies direct access to the file.
+$configCandidates[] = dirname(__DIR__) . '/croix-config.php';
+
+foreach ($configCandidates as $configPath) {
+    if (!is_file($configPath)) {
+        continue;
+    }
+
     $loaded = require $configPath;
     if (is_array($loaded)) {
         $config = $loaded;
+        break;
     }
 }
 
