@@ -1,11 +1,29 @@
 <script setup lang="ts">
+import type { CmsHomePage } from '~/types/cms'
+import { home as snapshotHome } from '~/data/content'
 import { projects } from '~/data/projects'
+import { cmsText } from '~/utils/cms'
+
+const props = withDefaults(
+  defineProps<{
+    work?: CmsHomePage['work']
+  }>(),
+  { work: () => snapshotHome.work },
+)
 
 const homeProjects = projects.slice(0, 5)
 const listRef = ref<HTMLElement | null>(null)
 const active = ref<number | null>(null)
 const px = ref(0)
 const py = ref(0)
+
+const view = computed(() => ({
+  eyebrow: cmsText(props.work.eyebrow),
+  title: cmsText(props.work.title),
+  intro: cmsText(props.work.intro),
+  footerNote: cmsText(props.work.footerNote),
+  footerLinkLabel: cmsText(props.work.footerLinkLabel),
+}))
 
 const current = computed(() => (active.value === null ? null : homeProjects[active.value]))
 
@@ -26,14 +44,13 @@ function onMove(event: PointerEvent) {
         <div class="lg:col-span-6">
           <p class="label mb-5 flex items-center gap-3 text-bronze-ink">
             <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-            03 / Selected work
+            {{ view.eyebrow }}
           </p>
-          <h2 class="display-section text-ink">Light, in the field.</h2>
+          <h2 class="display-section text-ink">{{ view.title }}</h2>
         </div>
         <div class="lg:col-span-6 lg:pl-10">
           <p class="max-w-xl text-base font-light leading-relaxed text-mineral sm:text-lg">
-            Heritage landmarks, luxury resorts, public transport, and workplaces — often alongside
-            Voltaire Light Design, In-visible lab, and Sergio Boccia Lighting Design.
+            {{ view.intro }}
           </p>
         </div>
       </div>
@@ -89,9 +106,9 @@ function onMove(event: PointerEvent) {
       </div>
 
       <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-mineral">
-        <span class="label">Full case studies in production</span>
+        <span class="label">{{ view.footerNote }}</span>
         <NuxtLink to="/work" class="link-quiet label text-bronze-ink transition hover:text-ink">
-          All projects ↗
+          {{ view.footerLinkLabel }} ↗
         </NuxtLink>
       </div>
     </div>

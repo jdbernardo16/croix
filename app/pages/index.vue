@@ -1,11 +1,17 @@
 <script setup lang="ts">
+import { site } from '~/data/content'
+import { home } from '~/data/pages'
+import { cmsText } from '~/utils/cms'
+
 useHead({
-  title: 'CROIX — Light, resolved.',
+  title: cmsText(home.meta.title, 'CROIX — Light, resolved.'),
   meta: [
     {
       name: 'description',
-      content:
+      content: cmsText(
+        home.meta.description,
         'Turnkey architectural lighting design, photometric engineering, and control systems. Milanese design leadership, Manila delivery.',
+      ),
     },
   ],
 })
@@ -13,15 +19,15 @@ useHead({
 
 <template>
   <div>
-    <SiteHeader />
+    <SiteHeader :site="site" />
     <main id="main">
-      <LightHero />
-      <TickerStrip />
-      <DisciplineSplit />
-      <WorkIndex />
-      <ProofStrip />
-      <ContactBlock />
+      <LightHero :hero="home.hero" />
+      <TickerStrip :items="home.ticker" />
+      <DisciplineSplit :disciplines="home.disciplines" />
+      <WorkIndex :work="home.work" />
+      <ProofStrip :proof="home.proof" />
+      <ContactBlock :contact="home.contact" />
     </main>
-    <SiteFooter />
+    <SiteFooter :site="site" />
   </div>
 </template>

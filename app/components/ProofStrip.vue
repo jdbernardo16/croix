@@ -1,34 +1,47 @@
 <script setup lang="ts">
-const stats = [
-  {
-    value: '35–55%',
-    label: 'Lower consultancy fees',
-    note: 'Against comparable studios in North America, Europe, the Middle East, and Australia.',
-  },
-  {
-    value: 'UGR < 19',
-    label: 'Glare compliance',
-    note: 'Verified in DIALux evo before a single fixture is purchased.',
-  },
-  {
-    value: '5,000 m²',
-    label: 'Volume tier',
-    note: 'Rate reductions on master plans, railways, and repetitive units.',
-  },
-  {
-    value: '05',
-    label: 'Phases, one team',
-    note: 'Concept to commissioning, with no handover gaps.',
-  },
-]
+import type { CmsHomePage } from '~/types/cms'
+import { home as snapshotHome } from '~/data/content'
+import { cmsText } from '~/utils/cms'
 
-const steps = [
-  { title: 'Concept & simulation', note: 'Dialux evo, false-colour, UGR' },
-  { title: 'Detailed plans', note: 'RCP, aiming, beam angles, Revit' },
-  { title: 'Control architecture', note: 'SLDs, DALI / DMX, load schedules' },
-  { title: 'Procurement', note: 'Brand-neutral schedules, BoQ' },
-  { title: 'Commissioning', note: 'Night aiming, lux verification, as-builts' },
-]
+const props = withDefaults(
+  defineProps<{
+    proof?: CmsHomePage['proof']
+  }>(),
+  { proof: () => snapshotHome.proof },
+)
+
+const stats = computed(() =>
+  props.proof.stats.map((stat) => ({
+    value: cmsText(stat.value),
+    label: cmsText(stat.label),
+    note: cmsText(stat.note),
+  })),
+)
+
+const steps = computed(() =>
+  props.proof.steps.map((step) => ({
+    title: cmsText(step.title),
+    note: cmsText(step.note),
+  })),
+)
+
+const view = computed(() => ({
+  eyebrow: cmsText(props.proof.eyebrow),
+  titleLine1: cmsText(props.proof.titleLine1),
+  titleLine2: cmsText(props.proof.titleLine2),
+  intro: cmsText(props.proof.intro),
+  image: props.proof.image?.src || '/img/projects/ccp-int-false.jpg',
+  imageAlt: cmsText(props.proof.imageAlt),
+  imageBadge: cmsText(props.proof.imageBadge),
+  imageCaption: cmsText(props.proof.imageCaption),
+  imageMeta: cmsText(props.proof.imageMeta),
+  imageFooterLeft: cmsText(props.proof.imageFooterLeft),
+  imageFooterRight: cmsText(props.proof.imageFooterRight),
+  sequenceLabel: cmsText(props.proof.sequenceLabel),
+  phaseCount: cmsText(props.proof.phaseCount),
+  footerNote: cmsText(props.proof.footerNote),
+  footerLinkLabel: cmsText(props.proof.footerLinkLabel),
+}))
 </script>
 
 <template>
@@ -38,17 +51,16 @@ const steps = [
         <div class="lg:col-span-7">
           <p class="label mb-5 flex items-center gap-3 text-bronze">
             <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-            04 / The evidence
+            {{ view.eyebrow }}
           </p>
           <h2 class="display-section text-gallery">
-            The numbers are<br />
-            part of the design.
+            {{ view.titleLine1 }}<br />
+            {{ view.titleLine2 }}
           </h2>
         </div>
         <div class="lg:col-span-5 lg:pl-8">
           <p class="max-w-md text-base font-light leading-relaxed text-alloy sm:text-lg">
-            Lighting is the one trade where “it looks fine” is not a submittal. Every scheme leaves the
-            studio with illuminance values, glare limits, load schedules, and a code path.
+            {{ view.intro }}
           </p>
         </div>
       </div>
@@ -66,8 +78,8 @@ const steps = [
       <figure class="mt-20" data-reveal>
         <div class="relative aspect-16/9 overflow-hidden rounded-aperture bg-charcoal sm:aspect-21/9">
           <img
-            src="/img/projects/ccp-int-false.jpg"
-            alt="DIALux false-colour illuminance map of the Cultural Center of the Philippines grand lobby"
+            :src="view.image"
+            :alt="view.imageAlt"
             class="h-full w-full object-cover"
             loading="lazy"
             decoding="async"
@@ -75,23 +87,23 @@ const steps = [
           <div class="absolute inset-0 bg-gradient-to-t from-darkroom/85 via-transparent to-darkroom/25"></div>
           <div class="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/20 bg-darkroom/50 px-3 py-1.5 backdrop-blur-md">
             <span class="h-1.5 w-1.5 rounded-full bg-viridian"></span>
-            <span class="label text-gallery">DIALux evo / verified</span>
+            <span class="label text-gallery">{{ view.imageBadge }}</span>
           </div>
           <div class="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 p-5 sm:p-7">
-            <span class="label text-gallery">CCP Grand Lobby — false-colour illuminance</span>
-            <span class="label text-gallery/70">UGR &lt; 19 · 150 lx target</span>
+            <span class="label text-gallery">{{ view.imageCaption }}</span>
+            <span class="label text-gallery/70">{{ view.imageMeta }}</span>
           </div>
         </div>
         <div class="mt-3 flex items-center justify-between text-alloy">
-          <span class="label">Photometric proof, not a mood board</span>
-          <span class="label">Sheet 01 / 05</span>
+          <span class="label">{{ view.imageFooterLeft }}</span>
+          <span class="label">{{ view.imageFooterRight }}</span>
         </div>
       </figure>
 
       <div class="mt-20" data-reveal>
         <div class="flex items-center justify-between">
-          <span class="label text-alloy">Delivery sequence</span>
-          <span class="label text-alloy">05 phases</span>
+          <span class="label text-alloy">{{ view.sequenceLabel }}</span>
+          <span class="label text-alloy">{{ view.phaseCount }}</span>
         </div>
         <div class="relative mt-7">
           <div class="absolute left-0 top-1 hidden h-px w-4/5 bg-white/15 sm:block"></div>
@@ -113,9 +125,9 @@ const steps = [
         </div>
 
         <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-5">
-          <span class="label text-alloy">Three packages, one delivery standard</span>
+          <span class="label text-alloy">{{ view.footerNote }}</span>
           <NuxtLink to="/services" class="link-quiet label text-bronze transition hover:text-gallery">
-            Explore services ↗
+            {{ view.footerLinkLabel }} ↗
           </NuxtLink>
         </div>
       </div>

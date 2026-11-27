@@ -1,14 +1,52 @@
 <script setup lang="ts">
+import type { CmsSiteSettings } from '~/types/cms'
+import { site as snapshotSite } from '~/data/content'
+import { cmsText } from '~/utils/cms'
+
+const props = withDefaults(
+  defineProps<{
+    site?: CmsSiteSettings
+  }>(),
+  { site: () => snapshotSite },
+)
+
 const open = ref(false)
 const scrolled = ref(false)
 
-const nav = [
-  { label: 'Work', to: '/work' },
-  { label: 'Services', to: '/services' },
-  { label: 'Studio', to: '/studio', exact: true },
-  { label: 'Team', to: '/studio/team' },
-  { label: 'Contact', to: '/contact' },
+const fallbackNav = [
+  { label: 'Work', url: '/work', sortOrder: 1, showInFooter: true },
+  { label: 'Services', url: '/services', sortOrder: 2, showInFooter: true },
+  { label: 'Studio', url: '/studio', sortOrder: 3, showInFooter: true },
+  { label: 'Team', url: '/studio/team', sortOrder: 4, showInFooter: true },
+  { label: 'Contact', url: '/contact', sortOrder: 5, showInFooter: true },
 ]
+
+const navItems = computed(() => {
+  const items = (props.site.nav.length ? props.site.nav : fallbackNav)
+    .slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+
+  return items.map((item) => {
+    const base = item.url.replace(/\/$/, '')
+
+    return {
+      label: item.label,
+      to: item.url,
+      // A parent route such as /studio must not stay active on /studio/team.
+      exact: items.some((other) => other.url !== item.url && other.url.startsWith(`${base}/`)),
+    }
+  })
+})
+
+const wordmark = computed(() => props.site.wordmark?.src || '/img/logo-word.png')
+const siteName = computed(() => cmsText(props.site.name, 'CROIX Lighting Design Studio'))
+const email = computed(() => cmsText(props.site.email))
+const emailHref = computed(() => `mailto:${email.value}`)
+// The snapshot has no dedicated start-project label/URL; the Contact nav entry
+// supplies the destination and the label stays structural.
+const startProjectUrl = computed(
+  () => navItems.value.find((item) => item.to === '/contact')?.to ?? '/contact',
+)
 
 function onScroll() {
   scrolled.value = window.scrollY > 24
@@ -36,13 +74,13 @@ onBeforeUnmount(() => {
       Skip to content
     </a>
     <div class="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-5 sm:px-8">
-      <NuxtLink to="/" class="shrink-0" aria-label="CROIX Lighting Design Studio — home">
-        <img src="/img/logo-word.png" alt="CROIX Lighting Design Studio" class="h-6 w-auto sm:h-7 lg:h-10" />
+      <NuxtLink to="/" class="shrink-0" :aria-label="`${siteName} — home`">
+        <img :src="wordmark" :alt="siteName" class="h-6 w-auto sm:h-7 lg:h-10" />
       </NuxtLink>
 
       <nav class="hidden items-center gap-8 text-mineral lg:flex">
         <NuxtLink
-          v-for="item in nav"
+          v-for="item in navItems"
           :key="item.to"
           :to="item.to"
           class="label transition hover:text-ink"
@@ -55,7 +93,7 @@ onBeforeUnmount(() => {
 
       <div class="flex items-center gap-3">
         <NuxtLink
-          to="/contact"
+          :to="startProjectUrl"
           class="label hidden items-center gap-2 rounded-full bg-darkroom px-5 py-2.5 text-gallery transition hover:bg-ink sm:inline-flex"
         >
           Start a project <span aria-hidden="true">↗</span>
@@ -83,7 +121,7 @@ onBeforeUnmount(() => {
       <div v-if="open" id="mobile-menu" class="border-y border-ink/10 bg-gallery/95 backdrop-blur-xl lg:hidden">
         <nav class="mx-auto max-w-7xl px-5 py-6 sm:px-8">
           <NuxtLink
-            v-for="(item, index) in nav"
+            v-for="(item, index) in navItems"
             :key="item.to"
             :to="item.to"
             class="flex items-baseline justify-between border-b border-ink/10 py-4 font-museum text-3xl font-extralight tracking-tight text-ink"
@@ -94,7 +132,7 @@ onBeforeUnmount(() => {
           </NuxtLink>
           <div class="mt-6 flex items-center justify-between text-mineral">
             <span class="label">Manila / Milan</span>
-            <a href="mailto:info@croixlighting.com.ph" class="label text-ink">info@croixlighting.com.ph</a>
+            <a :href="emailHref" class="label text-ink">{{ email }}</a>
           </div>
         </nav>
       </div>
