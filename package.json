@@ -3,8 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/ensure-cms-data.mjs",
     "dev": "nuxt dev --port 3030",
+    "cms:pull": "node scripts/cms-pull.mjs",
+    "prebuild": "node scripts/cms-pull.mjs",
     "build": "nuxt build",
+    "pregenerate": "node scripts/cms-pull.mjs",
     "generate": "nuxt generate --preset static",
     "preview": "nuxt preview",
     "deploy": "wrangler deploy",

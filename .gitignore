@@ -5,9 +5,19 @@ dist
 .data
 .env
 .env.*
+!.env.example
 .dev.vars
 .DS_Store
 *.log
 .wrangler
 croix-config.php
 croix-hostinger.zip
+
+# CMS pull output — regenerate with `npm run cms:pull`
+app/data/generated/*.json
+app/data/generated/*.tmp
+!app/data/generated/.gitkeep
+public/uploads/cms/
+
+# Local CodeGraph index
+.codegraph/
