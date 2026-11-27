@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getProject, projects, relatedProjects } from '~/data/projects'
+import { cmsText } from '~/utils/cms'
 
 const route = useRoute()
 const project = getProject(String(route.params.slug))
@@ -11,17 +12,23 @@ if (!project) {
 const related = relatedProjects(project.slug)
 const currentIndex = projects.findIndex((item) => item.slug === project.slug)
 const nextProject = projects[(currentIndex + 1) % projects.length]!
+const totalProjects = String(projects.length).padStart(2, '0')
+const heroEyebrow = [project.sector, project.location].filter(Boolean).join(' / ')
+
+const metaTitle = cmsText(project.meta.title, `${project.name} — CROIX`)
+const metaDescription = cmsText(project.meta.description, project.summary)
+const ogImage = cmsText(project.meta.ogImage?.src, project.image ?? '')
+
+useSeoMeta({
+  title: metaTitle,
+  description: metaDescription,
+  ogTitle: metaTitle,
+  ogDescription: metaDescription,
+  ...(ogImage ? { ogImage } : {}),
+})
 
 const indexFor = (slug: string) =>
   String(projects.findIndex((item) => item.slug === slug) + 1).padStart(2, '0')
-
-useSeoMeta({
-  title: project.name,
-  description: project.summary,
-  ogTitle: `${project.name} — CROIX`,
-  ogDescription: project.summary,
-  ogImage: project.image,
-})
 
 useHead({
   script: [
@@ -49,7 +56,7 @@ useHead({
     <main id="main">
       <PageHero
         section="Work / Case study"
-        :eyebrow="`${project.sector} / ${project.location}`"
+        :eyebrow="heroEyebrow"
         :title="project.name"
         :intro="project.summary"
         size="section"
@@ -87,7 +94,7 @@ useHead({
           <span class="label">
             {{ project.image ? 'Project imagery / CROIX documentation' : 'Light study / imagery in production' }}
           </span>
-          <span class="label">{{ indexFor(project.slug) }} / 08 · {{ project.sector }}</span>
+          <span class="label">{{ indexFor(project.slug) }} / {{ totalProjects }} · {{ project.sector }}</span>
         </figcaption>
       </figure>
 
@@ -183,7 +190,7 @@ useHead({
                 />
               </div>
               <figcaption class="mt-2 flex items-center justify-between gap-3 text-mineral">
-                <span class="label">{{ image.caption }}</span>
+                <span class="label">{{ image.caption ?? '' }}</span>
                 <span class="label">{{ String(index + 1).padStart(2, '0') }}</span>
               </figcaption>
             </figure>

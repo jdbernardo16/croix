@@ -38,3 +38,19 @@ export function cmsTel(value: string | null | undefined, fallback = ''): string 
   const number = cmsText(value, fallback).replace(/[^\d+]/g, '')
   return number ? `tel:${number}` : ''
 }
+
+/** Format an ISO date for display; an empty or invalid value becomes the fallback. */
+export function cmsDate(value: string | null | undefined, fallback = '', locale = 'en-GB'): string {
+  const raw = cmsText(value)
+  if (!raw) return fallback
+
+  const date = new Date(raw)
+  if (Number.isNaN(date.getTime())) return fallback
+
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+}

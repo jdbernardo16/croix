@@ -1,27 +1,57 @@
 <script setup lang="ts">
+import { contact } from '~/data/contact'
+import { site } from '~/data/site'
+import { cmsLines, cmsTel, cmsText } from '~/utils/cms'
+
 useSeoMeta({
-  title: 'Contact',
-  description:
-    'Send architectural drawings, reflected ceiling plans, mood images, and your target schedule to CROIX for a lighting design or photometric verification proposal.',
+  title: cmsText(contact.meta.title, 'Contact — CROIX'),
+  description: cmsText(contact.meta.description),
 })
 
-const steps = [
-  {
-    number: '01',
-    title: 'We review the drawings',
-    body: 'We check the scope, the project stage, and the technical questions that need an answer before a fee can be meaningful.',
+const copy = {
+  hero: {
+    section: cmsText(contact.hero.section, 'Contact'),
+    eyebrow: cmsText(contact.hero.eyebrow),
+    title: cmsText(contact.hero.title),
+    intro: cmsText(contact.hero.intro),
+    stats: contact.hero.stats.map((stat) => ({
+      value: cmsText(stat.value),
+      label: cmsText(stat.label),
+    })),
   },
-  {
-    number: '02',
-    title: 'We confirm the brief',
-    body: 'A short call or email aligns the package, the deliverables, the schedule, and who else is in the design team.',
+  supplierNote: {
+    label: cmsText(contact.supplierNote.label),
+    body: cmsText(contact.supplierNote.body),
+    linkLabel: cmsText(contact.supplierNote.linkLabel),
+    linkUrl: cmsText(contact.supplierNote.linkUrl, '/services'),
   },
-  {
-    number: '03',
-    title: 'You receive a fee proposal',
-    body: 'A clear scope and fee — usually within a few days — with the assumptions and exclusions stated up front.',
+  steps: {
+    eyebrow: cmsText(contact.steps.eyebrow),
+    title: cmsText(contact.steps.title),
+    intro: cmsText(contact.steps.intro),
+    items: contact.steps.items.map((step) => ({
+      number: cmsText(step.number),
+      title: cmsText(step.title),
+      body: cmsText(step.body),
+    })),
   },
-]
+}
+
+const email = cmsText(site.email)
+const phone = cmsText(site.phone)
+
+const direct = {
+  email,
+  emailHref: `mailto:${email}`,
+  phone,
+  phoneHref: cmsTel(phone),
+  addressLines: cmsLines(site.manilaAddress),
+  milanStudio: cmsText(site.milanStudio),
+  milanCountry: cmsText(site.milanCountry),
+  responseTime: cmsText(site.responseTime),
+  manilaCoordinates: cmsText(site.manilaCoordinates),
+  milanCoordinates: cmsText(site.milanCoordinates),
+}
 </script>
 
 <template>
@@ -29,20 +59,19 @@ const steps = [
     <SiteHeader />
     <main id="main">
       <PageHero
-        section="Contact"
-        eyebrow="Start a project"
-        title="Send the drawings."
-        intro="DWG, RVT, or PDF. Add mood images, your preferred package, and a target schedule. We will review the drawings and come back with a clear fee proposal within a few days."
+        :section="copy.hero.section"
+        :eyebrow="copy.hero.eyebrow"
+        :title="copy.hero.title"
+        :intro="copy.hero.intro"
       >
         <template #aside>
-          <div class="mt-8 grid grid-cols-2 gap-6 border-t border-ink/10 pt-5 text-mineral">
-            <div>
-              <span class="font-museum text-3xl font-extralight text-ink">02</span>
-              <span class="label mt-1 block">Studios, one team</span>
-            </div>
-            <div>
-              <span class="font-museum text-3xl font-extralight text-ink">05</span>
-              <span class="label mt-1 block">Leadership disciplines</span>
+          <div
+            v-if="copy.hero.stats.length"
+            class="mt-8 grid grid-cols-2 gap-6 border-t border-ink/10 pt-5 text-mineral"
+          >
+            <div v-for="stat in copy.hero.stats" :key="stat.label">
+              <span class="font-museum text-3xl font-extralight text-ink">{{ stat.value }}</span>
+              <span class="label mt-1 block">{{ stat.label }}</span>
             </div>
           </div>
         </template>
@@ -61,55 +90,61 @@ const steps = [
               <div class="rounded-panel border border-ink/15 bg-gallery p-6 sm:p-7">
                 <p class="label text-bronze-ink">Direct</p>
                 <a
-                  href="mailto:info@croixlighting.com.ph"
+                  :href="direct.emailHref"
                   class="mt-4 block break-words font-museum text-xl font-light tracking-tight text-ink transition hover:text-bronze-ink sm:text-2xl"
                 >
-                  info@croixlighting.com.ph
+                  {{ direct.email }}
                 </a>
                 <a
-                  href="tel:+639692228111"
+                  :href="direct.phoneHref"
                   class="mt-2 block text-sm font-light text-mineral transition hover:text-ink"
                 >
-                  +63 969 222 8111
+                  {{ direct.phone }}
                 </a>
 
                 <div class="mt-7 border-t border-ink/10 pt-5">
                   <p class="label text-bronze-ink">Manila engineering</p>
                   <p class="mt-3 text-sm font-light leading-relaxed text-mineral">
-                    Werco Arcade Lot 18,<br />
-                    Dr. A. Santos Ave., San Antonio 1,<br />
-                    Parañaque City 1715, PH
+                    <template v-for="(line, index) in direct.addressLines" :key="line">
+                      {{ line }}<br v-if="index < direct.addressLines.length - 1" />
+                    </template>
                   </p>
                 </div>
 
                 <div class="mt-6 border-t border-ink/10 pt-5">
                   <p class="label text-bronze-ink">Milan design</p>
                   <p class="mt-3 text-sm font-light leading-relaxed text-mineral">
-                    LUMEA Collective<br />
-                    Milan, Italy
+                    {{ direct.milanStudio }}<br />
+                    {{ direct.milanCountry }}
                   </p>
                 </div>
 
                 <div class="mt-6 flex items-center justify-between border-t border-ink/10 pt-5">
                   <span class="label text-mineral">Response</span>
-                  <span class="label text-ink">Within a few days</span>
+                  <span class="label text-ink">{{ direct.responseTime }}</span>
                 </div>
               </div>
 
-              <div class="mt-5 rounded-2xl border border-ink/10 bg-plaster/40 p-5">
-                <p class="label text-bronze-ink">For suppliers &amp; contractors</p>
+              <div
+                v-if="copy.supplierNote.label || copy.supplierNote.body"
+                class="mt-5 rounded-2xl border border-ink/10 bg-plaster/40 p-5"
+              >
+                <p class="label text-bronze-ink">{{ copy.supplierNote.label }}</p>
                 <p class="mt-2 text-xs font-light leading-relaxed text-mineral">
-                  Have a fixture list or a tender? Use the same form and note “supplier tender” in the
-                  project notes. Photometric verification has its own fast-track scope.
+                  {{ copy.supplierNote.body }}
                 </p>
-                <NuxtLink to="/services" class="link-quiet label mt-4 inline-block text-ink">
-                  See the packages ↗
+                <NuxtLink
+                  v-if="copy.supplierNote.linkLabel"
+                  :to="copy.supplierNote.linkUrl"
+                  class="link-quiet label mt-4 inline-block text-ink"
+                >
+                  {{ copy.supplierNote.linkLabel }} ↗
                 </NuxtLink>
               </div>
 
               <div class="mt-6 flex items-center justify-between text-mineral">
-                <span class="label">14.48°N 121.02°E</span>
-                <span class="label">45.46°N 9.19°E</span>
+                <span class="label">{{ direct.manilaCoordinates }}</span>
+                <span class="label">{{ direct.milanCoordinates }}</span>
               </div>
             </aside>
           </div>
@@ -122,18 +157,21 @@ const steps = [
             <div class="lg:col-span-5">
               <p class="label mb-5 flex items-center gap-3 text-bronze-ink">
                 <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-                What happens next
+                {{ copy.steps.eyebrow }}
               </p>
-              <h2 class="display-section text-ink">No black box.</h2>
+              <h2 class="display-section text-ink">{{ copy.steps.title }}</h2>
             </div>
             <p class="max-w-xl text-base font-light leading-relaxed text-mineral lg:col-span-6 lg:col-start-7">
-              The first reply is not a sales deck. It is a review of your drawings, a short set of
-              questions, and a scope that matches the stage you are actually at.
+              {{ copy.steps.intro }}
             </p>
           </div>
 
           <div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-3" data-reveal>
-            <article v-for="step in steps" :key="step.number" class="border-t border-ink/15 pt-6">
+            <article
+              v-for="(step, index) in copy.steps.items"
+              :key="index"
+              class="border-t border-ink/15 pt-6"
+            >
               <span class="label text-bronze-ink">{{ step.number }}</span>
               <h3 class="mt-4 font-museum text-xl font-light tracking-tight text-ink">{{ step.title }}</h3>
               <p class="mt-2 text-xs font-light leading-relaxed text-mineral">{{ step.body }}</p>

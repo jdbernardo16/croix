@@ -1,11 +1,29 @@
 <script setup lang="ts">
 import { projects, sectors, type Sector } from '~/data/projects'
+import { work } from '~/data/work'
+import { cmsText } from '~/utils/cms'
 
 useSeoMeta({
-  title: 'Work',
-  description:
-    'Selected CROIX projects across heritage, hospitality, transport, workplace, and retail — in the Philippines, Italy, Saudi Arabia, and South Korea.',
+  title: cmsText(work.meta.title, 'Work — CROIX'),
+  description: cmsText(work.meta.description),
 })
+
+const view = {
+  hero: {
+    section: cmsText(work.hero.section, 'Work'),
+    eyebrow: cmsText(work.hero.eyebrow),
+    title: cmsText(work.hero.title),
+    intro: cmsText(work.hero.intro),
+  },
+  stats: work.stats.map((stat) => ({
+    value: cmsText(stat.value),
+    label: cmsText(stat.label),
+  })),
+  note: {
+    label: cmsText(work.note.label),
+    body: cmsText(work.note.body),
+  },
+}
 
 const activeFilter = ref<'All' | Sector>('All')
 const filters: Array<'All' | Sector> = ['All', ...sectors]
@@ -32,20 +50,19 @@ function indexFor(slug: string) {
     <SiteHeader />
     <main id="main">
       <PageHero
-        section="Work"
-        eyebrow="Selected work / 08 projects"
-        title="Light, in the field."
-        intro="Heritage landmarks, luxury resorts, public transport, workplaces, and retail — often alongside Voltaire Light Design, In-visible lab, and Sergio Boccia Lighting Design."
+        :section="view.hero.section"
+        :eyebrow="view.hero.eyebrow"
+        :title="view.hero.title"
+        :intro="view.hero.intro"
       >
         <template #aside>
-          <div class="mt-8 grid grid-cols-2 gap-6 border-t border-ink/10 pt-5 text-mineral">
-            <div>
-              <span class="font-museum text-3xl font-extralight text-ink">04</span>
-              <span class="label mt-1 block">Countries</span>
-            </div>
-            <div>
-              <span class="font-museum text-3xl font-extralight text-ink">05</span>
-              <span class="label mt-1 block">Sectors</span>
+          <div
+            v-if="view.stats.length"
+            class="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-ink/10 pt-5 text-mineral"
+          >
+            <div v-for="stat in view.stats" :key="stat.label">
+              <span class="font-museum text-3xl font-extralight text-ink">{{ stat.value }}</span>
+              <span class="label mt-1 block">{{ stat.label }}</span>
             </div>
           </div>
         </template>
@@ -84,22 +101,20 @@ function indexFor(slug: string) {
             />
           </div>
 
-          <div class="mt-16 grid grid-cols-1 gap-6 border-t border-ink/10 pt-6 lg:grid-cols-12" data-reveal>
-            <p class="label text-bronze-ink lg:col-span-3">A note on imagery</p>
+          <div
+            v-if="view.note.label || view.note.body"
+            class="mt-16 grid grid-cols-1 gap-6 border-t border-ink/10 pt-6 lg:grid-cols-12"
+            data-reveal
+          >
+            <p class="label text-bronze-ink lg:col-span-3">{{ view.note.label }}</p>
             <p class="max-w-2xl text-xs font-light leading-relaxed text-mineral lg:col-span-8">
-              Where project photography is still being cleared, the project is presented as a
-              typographic light study. The work and the scope are real; the image is pending. CCP and
-              NSCR include CROIX documentation and DIALux verification plates.
+              {{ view.note.body }}
             </p>
           </div>
         </div>
       </section>
 
-      <CtaBand
-        eyebrow="Next project"
-        title="Add your building to the set."
-        text="Send the drawings, the stage, and the decisions still open. We will recommend a scope and a fee."
-      />
+      <CtaBand v-bind="work.cta" />
     </main>
     <SiteFooter />
   </div>

@@ -1,67 +1,75 @@
 <script setup lang="ts">
-import { standards } from '~/data/services'
+import { studio } from '~/data/studio'
+import { cmsList, cmsText } from '~/utils/cms'
 
 useSeoMeta({
-  title: 'Studio',
-  description:
-    'CROIX Lighting Design Studio — Milanese design leadership and Manila engineering for architectural lighting, photometric verification, and control systems.',
+  title: cmsText(studio.meta.title, 'Studio — CROIX'),
+  description: cmsText(studio.meta.description),
 })
 
-const timeline = [
-  {
-    label: '01 / Visualisation',
-    title: 'Rooms that only worked when the light was right',
-    body: 'While studying architecture at the University of Santo Tomas, Jonathan “Balong” Dela Cruz spent thousands of hours producing commissioned 3D architectural visualisations. High-end furniture and textured finishes only succeeded when the lighting was accurately placed — the observation that led him to specialise in illumination design.',
+const copy = {
+  hero: {
+    section: cmsText(studio.hero.section, 'Studio'),
+    eyebrow: cmsText(studio.hero.eyebrow),
+    title: cmsText(studio.hero.title),
+    intro: cmsText(studio.hero.intro),
   },
-  {
-    label: '02 / Light Plan',
-    title: 'A studio apprenticeship, and a shared standard',
-    body: 'After working with several architecture firms, Jonathan joined Light Plan, Inc., a pioneering lighting design studio at the time, and invited his former colleague Charmaine “Ming” Javier-Fornarelli to the studio. Together they contributed to the 2011 and 2016 Philippine Lighting Conferences.',
+  who: {
+    eyebrow: cmsText(studio.who.eyebrow),
+    title: cmsText(studio.who.title),
+    lead: cmsText(studio.who.lead),
+    paragraphs: cmsList(studio.who.paragraphs),
+    image: studio.who.image?.src || '/img/gallery-stair.jpg',
+    imageAlt: cmsText(studio.who.imageAlt, 'Daylight falling through a quiet concrete stair'),
+    captionLeft: cmsText(studio.who.captionLeft),
+    captionRight: cmsText(studio.who.captionRight),
   },
-  {
-    label: '03 / Manufacturing',
-    title: 'Learning how fixtures are actually built',
-    body: 'Jonathan moved into luminaire production and lamp distribution to understand how fixtures are engineered, sourced, and installed. That experience now informs the studio’s optical reviews, value engineering, and independent procurement policy.',
+  mission: {
+    label: cmsText(studio.mission.label),
+    title: cmsText(studio.mission.title),
+    body: cmsText(studio.mission.body),
   },
-  {
-    label: '04 / Field research',
-    title: 'The cost of over-lighting',
-    body: 'As early LED technology spread, lower electricity consumption led owners to over-light spaces with harsh, glaring fixtures. Jonathan documented the effects — indoor eye strain and outdoor light pollution — across the Sierra Madre mountains, the firefly habitats of Iwahig in Palawan, and pawikan conservation sites in La Union with CURMA. During the COVID-19 pandemic, he also documented how poorly specified household LEDs caused daily eye fatigue, headaches, and migraines.',
+  vision: {
+    label: cmsText(studio.vision.label),
+    title: cmsText(studio.vision.title),
+    body: cmsText(studio.vision.body),
   },
-  {
-    label: '05 / Milan',
-    title: 'European design leadership',
-    body: 'Charmaine became a licensed architect, practised with C.T. Onglao Architects and developer VConsunji, then moved to Italy to earn her Master’s Degree in Lighting Design and LED Technology at Politecnico di Milano. She practised in Milan with studios including Voltaire Light Design before founding LUMEA Collective.',
+  timeline: {
+    eyebrow: cmsText(studio.timeline.eyebrow),
+    title: cmsText(studio.timeline.title),
+    intro: cmsText(studio.timeline.intro),
+    items: studio.timeline.items.map((item) => ({
+      label: cmsText(item.label),
+      title: cmsText(item.title),
+      body: cmsText(item.body),
+    })),
   },
-  {
-    label: '06 / One practice',
-    title: 'Milan and Manila, in the same drawing set',
-    body: 'As LUMEA’s European practice grew, Charmaine needed a dedicated engineering team in the Philippines. Jonathan was building CROIX in Metro Manila around the same time. The two practices now operate as one delivery team: Milanese design direction, Manila engineering, and on-site commissioning across time zones.',
+  model: {
+    eyebrow: cmsText(studio.model.eyebrow),
+    titleLine1: cmsText(studio.model.titleLine1),
+    titleLine2: cmsText(studio.model.titleLine2),
+    intro: cmsText(studio.model.intro),
+    cards: studio.model.cards.map((card) => ({
+      label: cmsText(card.label),
+      meta: cmsText(card.meta),
+      title: cmsText(card.title),
+      body: cmsText(card.body),
+      points: cmsList(card.points),
+    })),
   },
-]
-
-const principles = [
-  {
-    number: '01',
-    title: 'Human comfort first',
-    body: 'Glare, colour rendering, and vertical illuminance are treated as design constraints, not finishing touches. A room should feel comfortable after an hour, not just photogenic for a minute.',
+  principles: {
+    eyebrow: cmsText(studio.principles.eyebrow),
+    title: cmsText(studio.principles.title),
+    intro: cmsText(studio.principles.intro),
+    items: studio.principles.items.map((principle) => ({
+      number: cmsText(principle.number),
+      title: cmsText(principle.title),
+      body: cmsText(principle.body),
+    })),
   },
-  {
-    number: '02',
-    title: 'Protect the night sky',
-    body: 'Outdoor light is shielded, aimed, and dimmed so it lands on people and surfaces rather than drifting upward. DarkSky principles are part of the brief, not an afterthought.',
-  },
-  {
-    number: '03',
-    title: 'Stay brand-neutral',
-    body: 'CROIX does not manufacture or sell fixtures. Schedules, Bills of Quantities, and value-engineering reviews are written without a product allegiance — so the specification is defensible.',
-  },
-  {
-    number: '04',
-    title: 'Prove it',
-    body: 'DIALux evo calculations, false-colour illuminance maps, UGR reports, load schedules, and code paths leave the studio with the design. The numbers are part of the deliverable.',
-  },
-]
+  standardsLabel: cmsText(studio.standardsLabel, 'Codes & standards'),
+  standards: cmsList(studio.standards),
+}
 </script>
 
 <template>
@@ -69,10 +77,10 @@ const principles = [
     <SiteHeader />
     <main id="main">
       <PageHero
-        section="Studio"
-        eyebrow="The practice / Manila · Milan"
-        title="A practice built around light."
-        intro="CROIX is a turnkey lighting design and engineering studio. Milanese design leadership, Manila technical delivery, and one accountable team from first sketch to opening night."
+        :section="copy.hero.section"
+        :eyebrow="copy.hero.eyebrow"
+        :title="copy.hero.title"
+        :intro="copy.hero.intro"
       />
 
       <section class="bg-gallery py-24 sm:py-32">
@@ -81,49 +89,37 @@ const principles = [
             <div class="lg:col-span-4" data-reveal>
               <p class="label mb-5 flex items-center gap-3 text-bronze-ink">
                 <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-                01 / Who we are
+                {{ copy.who.eyebrow }}
               </p>
-              <h2 class="display-section text-ink">The last five percent.</h2>
+              <h2 class="display-section text-ink">{{ copy.who.title }}</h2>
               <p class="mt-6 max-w-sm text-sm font-light leading-relaxed text-mineral">
-                You can spend months planning a building and sourcing stone, timber, and fabrics. The
-                final appearance and comfort of that space still depend on how it is lit.
+                {{ copy.who.lead }}
               </p>
             </div>
             <div class="lg:col-span-8 lg:pl-8" data-reveal>
               <div class="grid grid-cols-1 gap-8 sm:grid-cols-12">
                 <div class="space-y-5 sm:col-span-7">
-                  <p class="text-base font-light leading-relaxed text-mineral sm:text-lg">
-                    Lighting determines how a room functions and looks the moment someone walks
-                    through the door. It is the difference between a hotel lobby that feels welcome, an
-                    office where people can work all day without eye strain, and a building exterior
-                    that remains safe and visible at night.
-                  </p>
-                  <p class="text-base font-light leading-relaxed text-mineral">
-                    CROIX, together with our Italian sister studio LUMEA Collective, provides complete
-                    turnkey lighting and control solutions from initial concept to final installation.
-                    We combine architectural lighting design from Milan with illumination and control
-                    systems engineering in Metro Manila.
-                  </p>
-                  <p class="text-base font-light leading-relaxed text-mineral">
-                    We partner with property developers, architects, interior designers, electrical
-                    contractors, engineers, and lighting suppliers around the world. Indoor light should
-                    be as comfortable as natural daylight; outdoor light should guide people safely
-                    without wasting electricity or polluting the night sky.
+                  <p
+                    v-for="paragraph in copy.who.paragraphs"
+                    :key="paragraph.slice(0, 32)"
+                    class="text-base font-light leading-relaxed text-mineral sm:text-lg"
+                  >
+                    {{ paragraph }}
                   </p>
                 </div>
                 <figure class="sm:col-span-5">
                   <div class="overflow-hidden rounded-aperture">
                     <img
-                      src="/img/gallery-stair.jpg"
-                      alt="Daylight falling through a quiet concrete stair"
+                      :src="copy.who.image"
+                      :alt="copy.who.imageAlt"
                       class="aspect-4/5 w-full object-cover"
                       loading="lazy"
                       decoding="async"
                     />
                   </div>
                   <figcaption class="mt-3 flex items-center justify-between text-mineral">
-                    <span class="label">Practice study</span>
-                    <span class="label">Manila / Milan</span>
+                    <span class="label">{{ copy.who.captionLeft }}</span>
+                    <span class="label">{{ copy.who.captionRight }}</span>
                   </figcaption>
                 </figure>
               </div>
@@ -136,27 +132,21 @@ const principles = [
         <div class="mx-auto max-w-7xl px-5 sm:px-8">
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <article class="rounded-panel bg-gallery p-7 sm:p-10" data-reveal>
-              <p class="label text-bronze-ink">Mission</p>
+              <p class="label text-bronze-ink">{{ copy.mission.label }}</p>
               <h2 class="mt-5 font-museum text-3xl font-extralight tracking-tight text-ink sm:text-4xl">
-                Comfortable inside. Safe outside. On time and on budget.
+                {{ copy.mission.title }}
               </h2>
               <p class="mt-5 max-w-xl text-base font-light leading-relaxed text-mineral">
-                To deliver complete turnkey lighting design, photometric engineering, and control
-                system solutions that make indoor spaces comfortable for occupants, keep outdoor
-                environments safe from glare and light pollution, and help construction teams complete
-                projects on time and within budget.
+                {{ copy.mission.body }}
               </p>
             </article>
             <article class="rounded-panel bg-darkroom p-7 text-gallery sm:p-10" data-reveal>
-              <p class="label text-bronze">Vision</p>
+              <p class="label text-bronze">{{ copy.vision.label }}</p>
               <h2 class="mt-5 font-museum text-3xl font-extralight tracking-tight text-gallery sm:text-4xl">
-                The trusted lighting partner across borders.
+                {{ copy.vision.title }}
               </h2>
               <p class="mt-5 max-w-xl text-base font-light leading-relaxed text-alloy">
-                To be the trusted global lighting and engineering partner for property developers,
-                architects, contractors, and lighting suppliers, setting the practical standard for
-                built environments where architectural materials, electrical systems, and human visual
-                comfort work together reliably.
+                {{ copy.vision.body }}
               </p>
             </article>
           </div>
@@ -169,20 +159,18 @@ const principles = [
             <div class="lg:col-span-4 lg:sticky lg:top-28 lg:self-start" data-reveal>
               <p class="label mb-5 flex items-center gap-3 text-bronze-ink">
                 <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-                02 / Origin
+                {{ copy.timeline.eyebrow }}
               </p>
-              <h2 class="display-section text-ink">Light, nature, and the spaces we share.</h2>
+              <h2 class="display-section text-ink">{{ copy.timeline.title }}</h2>
               <p class="mt-6 max-w-sm text-sm font-light leading-relaxed text-mineral">
-                The studio grew out of visualisation, luminaire manufacturing, field research, and a
-                Milan–Manila partnership. The through-line is the same: light has to work for the
-                people in the room and for the sky outside it.
+                {{ copy.timeline.intro }}
               </p>
             </div>
             <div class="lg:col-span-8 lg:pl-8">
               <ol class="border-l border-ink/15 pl-8" data-reveal>
                 <li
-                  v-for="item in timeline"
-                  :key="item.label"
+                  v-for="(item, index) in copy.timeline.items"
+                  :key="index"
                   class="relative pb-12 before:absolute before:-left-1 before:top-1 before:h-2 before:w-2 before:rounded-full before:bg-bronze last:pb-0"
                 >
                   <span class="label text-bronze-ink">{{ item.label }}</span>
@@ -205,63 +193,36 @@ const principles = [
             <div class="lg:col-span-6">
               <p class="label mb-5 flex items-center gap-3 text-bronze">
                 <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-                03 / The model
+                {{ copy.model.eyebrow }}
               </p>
               <h2 class="display-section text-gallery">
-                Milan draws.<br />
-                Manila resolves.
+                {{ copy.model.titleLine1 }}<template v-if="copy.model.titleLine2"><br />{{ copy.model.titleLine2 }}</template>
               </h2>
             </div>
             <p class="max-w-xl text-base font-light leading-relaxed text-alloy lg:col-span-5 lg:col-start-8">
-              One practice, two centres of gravity. The design direction sits close to the European
-              architecture and hospitality market; the engineering hub sits close to the drawings,
-              contractors, and site conditions where the work is built.
+              {{ copy.model.intro }}
             </p>
           </div>
 
           <div class="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <article class="rounded-panel border border-white/10 bg-shadow/60 p-7 sm:p-10" data-reveal>
+            <article
+              v-for="(card, index) in copy.model.cards"
+              :key="index"
+              class="rounded-panel border border-white/10 bg-shadow/60 p-7 sm:p-10"
+              data-reveal
+            >
               <div class="flex items-baseline justify-between gap-4">
-                <span class="label text-bronze">Milan / LUMEA Collective</span>
-                <span class="label text-alloy">Design</span>
+                <span class="label text-bronze">{{ card.label }}</span>
+                <span class="label text-alloy">{{ card.meta }}</span>
               </div>
               <h3 class="mt-5 font-museum text-3xl font-extralight tracking-tight text-gallery">
-                Creative direction
+                {{ card.title }}
               </h3>
               <p class="mt-4 text-sm font-light leading-relaxed text-alloy">
-                Principal Lighting Designer Ar. Charmaine “Ming” Javier-Fornarelli leads the design
-                division from Milan. A Politecnico di Milano graduate and licensed architect, she sets
-                the creative and technical standard across heritage landmarks, corporate headquarters,
-                and luxury hospitality — often alongside European studios including Voltaire Light
-                Design, In-visible lab, and Sergio Boccia Lighting Design.
+                {{ card.body }}
               </p>
               <ul class="mt-6 space-y-2 border-t border-white/10 pt-5 text-xs font-light text-alloy">
-                <li>Concept, daylighting, and atmosphere</li>
-                <li>Heritage and hospitality design review</li>
-                <li>European studio collaboration</li>
-                <li>Brand-neutral fixture direction</li>
-              </ul>
-            </article>
-
-            <article class="rounded-panel border border-white/10 bg-shadow/60 p-7 sm:p-10" data-reveal>
-              <div class="flex items-baseline justify-between gap-4">
-                <span class="label text-bronze">Manila / Engineering</span>
-                <span class="label text-alloy">Delivery</span>
-              </div>
-              <h3 class="mt-5 font-museum text-3xl font-extralight tracking-tight text-gallery">
-                Technical execution
-              </h3>
-              <p class="mt-4 text-sm font-light leading-relaxed text-alloy">
-                The Metro Manila hub turns the design into buildable documentation: DIALux evo
-                verification, AutoCAD and Revit layouts, control architecture, load schedules,
-                procurement support, and on-site commissioning. Electrical engineers trained in
-                government plan review close the loop between design intent and inspection.
-              </p>
-              <ul class="mt-6 space-y-2 border-t border-white/10 pt-5 text-xs font-light text-alloy">
-                <li>Photometrics and false-colour verification</li>
-                <li>RCP, SLD, cable schedules, load computations</li>
-                <li>Controls integration and programming</li>
-                <li>Nighttime aiming, lux verification, handover</li>
+                <li v-for="point in card.points" :key="point">{{ point }}</li>
               </ul>
             </article>
           </div>
@@ -274,18 +235,21 @@ const principles = [
             <div class="lg:col-span-5">
               <p class="label mb-5 flex items-center gap-3 text-bronze-ink">
                 <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-                04 / Principles
+                {{ copy.principles.eyebrow }}
               </p>
-              <h2 class="display-section text-ink">How we make decisions.</h2>
+              <h2 class="display-section text-ink">{{ copy.principles.title }}</h2>
             </div>
             <p class="max-w-xl text-base font-light leading-relaxed text-mineral lg:col-span-6 lg:col-start-7">
-              These are the constraints we bring to every project — before the fixture schedule, before
-              the renders, and before the budget conversation.
+              {{ copy.principles.intro }}
             </p>
           </div>
 
           <div class="mt-14 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4" data-reveal>
-            <article v-for="principle in principles" :key="principle.number" class="border-t border-ink/15 pt-6">
+            <article
+              v-for="(principle, index) in copy.principles.items"
+              :key="index"
+              class="border-t border-ink/15 pt-6"
+            >
               <span class="label text-bronze-ink">{{ principle.number }}</span>
               <h3 class="mt-4 font-museum text-xl font-light tracking-tight text-ink">
                 {{ principle.title }}
@@ -294,10 +258,10 @@ const principles = [
             </article>
           </div>
 
-          <div class="mt-16 border-y border-ink/10 py-6" data-reveal>
+          <div v-if="copy.standards.length" class="mt-16 border-y border-ink/10 py-6" data-reveal>
             <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
-              <span class="label shrink-0 text-bronze-ink">Codes &amp; standards</span>
-              <span v-for="standard in standards" :key="standard" class="label text-mineral">
+              <span class="label shrink-0 text-bronze-ink">{{ copy.standardsLabel }}</span>
+              <span v-for="standard in copy.standards" :key="standard" class="label text-mineral">
                 {{ standard }}
               </span>
             </div>
@@ -305,11 +269,7 @@ const principles = [
         </div>
       </section>
 
-      <CtaBand
-        eyebrow="Next"
-        title="Bring us the drawings."
-        text="Tell us where the project is, what stage it is at, and which decisions are still open. We will come back with a clear scope and fee proposal."
-      />
+      <CtaBand v-bind="studio.cta" />
     </main>
     <SiteFooter />
   </div>

@@ -1,4 +1,4 @@
-import type { CmsGalleryImage, CmsProject } from '~/types/cms'
+import type { CmsGalleryImage, CmsMeta, CmsProject } from '~/types/cms'
 import { cmsList, cmsText } from '~/utils/cms'
 import snapshot from './generated/projects.json'
 
@@ -24,6 +24,7 @@ export type ProjectImage = {
 export type Project = {
   slug: string
   name: string
+  meta: CmsMeta
   location: string
   sector: Sector
   collaborator?: string
@@ -68,6 +69,7 @@ function toProject(project: CmsProject): Project {
   return {
     slug,
     name,
+    meta: project.meta,
     location: cmsText(project.location),
     sector: cmsText(project.sector, 'Other'),
     ...(project.collaborator ? { collaborator: project.collaborator } : {}),

@@ -1,15 +1,57 @@
 <script setup lang="ts">
 import { audiences, packages, phases, platforms, standards } from '~/data/services'
+import { services } from '~/data/servicesPage'
+import { cmsList, cmsText } from '~/utils/cms'
 
 useSeoMeta({
-  title: 'Services',
-  description:
-    'Turnkey lighting design, DIALux verification, control architecture, procurement, and commissioning — three packages for developers, architects, contractors, and suppliers.',
+  title: cmsText(services.meta.title, 'Services — CROIX'),
+  description: cmsText(services.meta.description),
 })
 
-const activeAudience = ref(audiences[0]!.id)
+const copy = {
+  hero: {
+    section: cmsText(services.hero.section, 'Services'),
+    eyebrow: cmsText(services.hero.eyebrow),
+    title: cmsText(services.hero.title),
+    intro: cmsText(services.hero.intro),
+    stats: services.hero.stats.map((stat) => ({
+      value: cmsText(stat.value),
+      label: cmsText(stat.label),
+    })),
+  },
+  problem: {
+    eyebrow: cmsText(services.problem.eyebrow),
+    title: cmsText(services.problem.title),
+    body: cmsText(services.problem.body),
+    bullets: cmsList(services.problem.bullets),
+  },
+  audiences: {
+    eyebrow: cmsText(services.audiences.eyebrow),
+    title: cmsText(services.audiences.title),
+    intro: cmsText(services.audiences.intro),
+  },
+  packages: {
+    eyebrow: cmsText(services.packages.eyebrow),
+    title: cmsText(services.packages.title),
+    intro: cmsText(services.packages.intro),
+  },
+  volume: {
+    label: cmsText(services.volume.label),
+    body: cmsText(services.volume.body),
+    value: cmsText(services.volume.value),
+  },
+  phases: {
+    eyebrow: cmsText(services.phases.eyebrow),
+    title: cmsText(services.phases.title),
+    intro: cmsText(services.phases.intro),
+  },
+  platformsLabel: cmsText(services.platformsLabel, 'Controls platforms'),
+  standardsLabel: cmsText(services.standardsLabel, 'Codes & standards'),
+}
+
+const activeAudience = ref(audiences[0]?.id ?? '')
 const currentAudience = computed(
-  () => audiences.find((audience) => audience.id === activeAudience.value) ?? audiences[0]!,
+  () => audiences.find((audience) => audience.id === activeAudience.value) ?? audiences[0],
 )
 
 function selectTab(id: string) {
@@ -27,9 +69,12 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
   if (event.key === 'Home') next = 0
   if (event.key === 'End') next = audiences.length - 1
 
-  activeAudience.value = audiences[next]!.id
+  const target = audiences[next]
+  if (!target) return
+
+  activeAudience.value = target.id
   nextTick(() => {
-    document.getElementById(`audience-tab-${audiences[next]!.id}`)?.focus()
+    document.getElementById(`audience-tab-${target.id}`)?.focus()
   })
 }
 </script>
@@ -39,20 +84,19 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
     <SiteHeader />
     <main id="main">
       <PageHero
-        section="Services"
-        eyebrow="Turnkey lighting &amp; control"
-        title="One team from first sketch to opening night."
-        intro="Design, photometric verification, control architecture, procurement, and commissioning — held by one accountable team instead of four separate vendors."
+        :section="copy.hero.section"
+        :eyebrow="copy.hero.eyebrow"
+        :title="copy.hero.title"
+        :intro="copy.hero.intro"
       >
         <template #aside>
-          <div class="mt-8 grid grid-cols-2 gap-6 border-t border-ink/10 pt-5 text-mineral">
-            <div>
-              <span class="font-museum text-3xl font-extralight text-ink">03</span>
-              <span class="label mt-1 block">Service packages</span>
-            </div>
-            <div>
-              <span class="font-museum text-3xl font-extralight text-ink">05</span>
-              <span class="label mt-1 block">Delivery phases</span>
+          <div
+            v-if="copy.hero.stats.length"
+            class="mt-8 grid grid-cols-2 gap-6 border-t border-ink/10 pt-5 text-mineral"
+          >
+            <div v-for="stat in copy.hero.stats" :key="stat.label">
+              <span class="font-museum text-3xl font-extralight text-ink">{{ stat.value }}</span>
+              <span class="label mt-1 block">{{ stat.label }}</span>
             </div>
           </div>
         </template>
@@ -64,22 +108,19 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
             <div class="lg:col-span-5">
               <p class="label mb-5 flex items-center gap-3 text-bronze-ink">
                 <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-                01 / The problem
+                {{ copy.problem.eyebrow }}
               </p>
-              <h2 class="display-section text-ink">Lighting fails between the trades.</h2>
+              <h2 class="display-section text-ink">{{ copy.problem.title }}</h2>
             </div>
             <div class="lg:col-span-6 lg:col-start-7">
               <p class="max-w-xl text-base font-light leading-relaxed text-mineral sm:text-lg">
-                On most construction projects, lighting is split across separate vendors. An architect
-                or interior designer selects the concept, an electrical engineer calculates the power
-                loads, a supplier sells the fixtures, and a contractor installs the wiring. No single
-                team owns the whole sequence.
+                {{ copy.problem.body }}
               </p>
-              <ul class="mt-7 grid grid-cols-1 gap-3 border-t border-ink/10 pt-6 text-sm font-light text-mineral sm:grid-cols-2">
-                <li>Unverified fixture substitutions</li>
-                <li>Dimming protocols that do not communicate</li>
-                <li>Failed local building inspections</li>
-                <li>Expensive electrical rework on site</li>
+              <ul
+                v-if="copy.problem.bullets.length"
+                class="mt-7 grid grid-cols-1 gap-3 border-t border-ink/10 pt-6 text-sm font-light text-mineral sm:grid-cols-2"
+              >
+                <li v-for="bullet in copy.problem.bullets" :key="bullet">{{ bullet }}</li>
               </ul>
             </div>
           </div>
@@ -92,18 +133,18 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
             <div class="lg:col-span-5">
               <p class="label mb-5 flex items-center gap-3 text-bronze-ink">
                 <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-                02 / Who it is for
+                {{ copy.audiences.eyebrow }}
               </p>
-              <h2 class="display-section text-ink">Four audiences. One standard.</h2>
+              <h2 class="display-section text-ink">{{ copy.audiences.title }}</h2>
             </div>
             <p class="max-w-xl text-base font-light leading-relaxed text-mineral lg:col-span-6 lg:col-start-7">
-              The technical, financial, and scheduling problems look different from each side of the
-              table. Select your role to see the part of the service that matters most.
+              {{ copy.audiences.intro }}
             </p>
           </div>
 
           <div class="mt-12" data-reveal>
             <div
+              v-if="audiences.length"
               class="flex gap-2 overflow-x-auto border-b border-ink/15 pb-3"
               role="tablist"
               aria-label="Project roles"
@@ -131,6 +172,7 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
             </div>
 
             <div
+              v-if="currentAudience"
               id="audience-panel"
               role="tabpanel"
               :aria-labelledby="`audience-tab-${currentAudience.id}`"
@@ -172,14 +214,12 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
             <div class="lg:col-span-5">
               <p class="label mb-5 flex items-center gap-3 text-bronze-ink">
                 <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-                03 / Packages
+                {{ copy.packages.eyebrow }}
               </p>
-              <h2 class="display-section text-ink">Three ways to work.</h2>
+              <h2 class="display-section text-ink">{{ copy.packages.title }}</h2>
             </div>
             <p class="max-w-xl text-base font-light leading-relaxed text-mineral lg:col-span-6 lg:col-start-7">
-              Because we pair Milanese design leadership with the Manila engineering hub, clients save
-              35% to 55% compared to typical consultancy rates in North America, Europe, the Middle
-              East, and Australia.
+              {{ copy.packages.intro }}
             </p>
           </div>
 
@@ -234,18 +274,20 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
             </article>
           </div>
 
-          <div class="mt-8 rounded-2xl border border-ink/15 bg-plaster/40 p-6 sm:p-8" data-reveal>
+          <div
+            v-if="copy.volume.label || copy.volume.body || copy.volume.value"
+            class="mt-8 rounded-2xl border border-ink/15 bg-plaster/40 p-6 sm:p-8"
+            data-reveal
+          >
             <div class="grid grid-cols-1 items-center gap-4 lg:grid-cols-12">
               <div class="lg:col-span-8">
-                <p class="label text-bronze-ink">Volume &amp; master-plan tier</p>
+                <p class="label text-bronze-ink">{{ copy.volume.label }}</p>
                 <p class="mt-2 max-w-2xl text-sm font-light leading-relaxed text-mineral">
-                  For large-scale master plans, public railways, roadways, and repetitive hospitality or
-                  residential units exceeding 5,000 m², we apply volume-rate reductions to maximise the
-                  project savings.
+                  {{ copy.volume.body }}
                 </p>
               </div>
               <div class="lg:col-span-4 lg:text-right">
-                <span class="font-museum text-4xl font-extralight tracking-tight text-ink">5,000 m²+</span>
+                <span class="font-museum text-4xl font-extralight tracking-tight text-ink">{{ copy.volume.value }}</span>
               </div>
             </div>
           </div>
@@ -258,13 +300,12 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
             <div class="lg:col-span-5">
               <p class="label mb-5 flex items-center gap-3 text-bronze">
                 <span class="h-1.5 w-1.5 rounded-full bg-bronze"></span>
-                04 / Deliverables
+                {{ copy.phases.eyebrow }}
               </p>
-              <h2 class="display-section text-gallery">What leaves the studio.</h2>
+              <h2 class="display-section text-gallery">{{ copy.phases.title }}</h2>
             </div>
             <p class="max-w-xl text-base font-light leading-relaxed text-alloy lg:col-span-6 lg:col-start-7">
-              Every phase produces something the next trade can build from. The numbers, drawings, and
-              schedules are part of the design — not an appendix assembled after the fact.
+              {{ copy.phases.intro }}
             </p>
           </div>
 
@@ -291,7 +332,7 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
 
           <div class="mt-14 grid grid-cols-1 gap-10 lg:grid-cols-12" data-reveal>
             <div class="lg:col-span-6">
-              <p class="label text-bronze">Controls platforms</p>
+              <p class="label text-bronze">{{ copy.platformsLabel }}</p>
               <div class="mt-4 flex flex-wrap gap-2">
                 <span
                   v-for="platform in platforms"
@@ -303,7 +344,7 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
               </div>
             </div>
             <div class="lg:col-span-6">
-              <p class="label text-bronze">Codes &amp; standards</p>
+              <p class="label text-bronze">{{ copy.standardsLabel }}</p>
               <div class="mt-4 flex flex-wrap gap-2">
                 <span
                   v-for="standard in standards"
@@ -318,11 +359,7 @@ function onTabKeydown(event: KeyboardEvent, index: number) {
         </div>
       </section>
 
-      <CtaBand
-        eyebrow="Scope"
-        title="Tell us what stage you are at."
-        text="Concept, tender, construction, or a fixture list that needs verifying — send the drawings and we will recommend the right package."
-      />
+      <CtaBand v-bind="services.cta" />
     </main>
     <SiteFooter />
   </div>
