@@ -13,10 +13,10 @@ Prerequisites:
 - The CMS is deployed, seeded, and answering
   `https://cms.croixlighting.com.ph/graphql` (assumed hostname) — see
   `../croix-cms/DEPLOY.md`.
-- **The release branch is merged to `main`, or the Pages production branch is
-  set to the release branch** (currently `feat/headless-cms`). `main` does not
-  contain the headless work yet; a build from `main` today would ship the old
-  static site.
+- **The release branch `feat/headless-cms` is merged to `main` before the Pages
+  project is created.** `main` is at `7395c04` and does not contain the headless
+  work; a build from `main` today would ship the old static site. The Pages
+  production branch is `main` from the first build.
 - The `croix` repository (`github.com/jdbernardo16/croix`) is pushed.
 - A Cloudflare account with a Pages project allowed.
 
@@ -35,8 +35,10 @@ Git**:
 | Build output directory | `.output/public` |
 
 The production branch must contain the release commit: merge
-`feat/headless-cms` to `main` first, or use `feat/headless-cms` as the production
-branch for the first deployment and switch to `main` after the merge.
+`feat/headless-cms` to `main` first. Do not start with the release branch as the
+production branch — Cloudflare deploy hooks are branch-scoped, so switching the
+production branch later leaves the hook rebuilding the old branch and `main`
+stops receiving CMS publishes.
 
 `npm run generate` is `nuxt generate --preset static`; keep the preset. Do not
 switch the command to `npm run build`, and do not set `NITRO_PRESET` — a
@@ -70,7 +72,9 @@ Notes:
 ## 3. Deploy hook for CMS publishes
 
 1. Pages project → Settings → **Builds & deployments** → **Deploy hooks** →
-   add a hook for the production branch chosen in §1.
+   add a hook for the production branch (`main`). Deploy hooks are
+   branch-scoped: if the production branch ever changes, create a new hook and
+   update `CROIX_BUILD_HOOK`.
 2. Copy the generated URL. It contains a token: treat it as a secret and never
    commit it.
 3. Put it in the CMS `.env` as `CROIX_BUILD_HOOK` (`../croix-cms/DEPLOY.md`
@@ -81,11 +85,12 @@ vendor/bin/sake tasks:trigger-build
 ```
 
 Trigger is a POST with `{"source":"croix-cms","event":"publish"}` (or
-`unpublish`, `siteconfig`, `navitem`), debounced for 60 seconds in the CMS.
-Publishing in the CMS should start one Pages build **of the production branch**,
-so the change appears on the production `*.pages.dev` deployment
-(`https://<project>.pages.dev`), not on a preview URL. To see a CMS change on a
-preview deployment, push the preview branch after the publish.
+`unpublish`, `siteconfig`, `navitem`), behind a leading-edge 60-second throttle
+in the CMS. Publishing in the CMS should start one Pages build **of the
+production branch (`main`)**, so the change appears on the production
+`*.pages.dev` deployment (`https://<project>.pages.dev`), not on a preview URL.
+To see a CMS change on a preview deployment, push the preview branch after the
+publish.
 
 ## 4. Contact form on Pages
 
@@ -107,21 +112,21 @@ Set these runtime variables for **Production and Preview**:
 
 ## 5. Preview verification (before any DNS change)
 
-Every non-production branch gets a preview URL
-(`https://<hash>.<project>.pages.dev`). Push the release branch, wait for the
-build, then check:
+Push `main`; that builds the production deployment
+(`https://<project>.pages.dev`). Non-production branches, if any, get preview
+URLs (`https://<hash>.<project>.pages.dev`). Wait for the build, then check:
 
 - `/`, `/work`, `/work/cultural-center-philippines`, `/services`, `/studio`,
   `/studio/team`, `/contact`, `/privacy`, `/terms`.
 - A missing URL returns the static 404 page with status 404.
 - Images load from `/uploads/cms/<hash>.jpg` — not from the CMS host. The build
   must contain no `cms.croixlighting.com.ph` image URLs.
-- Copy matches the CMS. Change one field in `/admin`, publish, then push the
-  preview branch and confirm the change appears — the deploy hook rebuilds the
-  production branch only.
-- On the production `*.pages.dev` deployment, publishing alone should rebuild.
+- Copy matches the CMS. Change one field in `/admin` and publish: the hook
+  rebuilds `main`, so confirm the change on the production deployment.
+- If you verify on a preview branch instead, push that branch after the publish;
+  the hook rebuilds `main` only.
 - Contact form: submit a real enquiry; check the inbox and the Brevo log.
-- Mobile width and `https://` on the preview hostname.
+- Mobile width and `https://` on the deployment hostname.
 
 Only after sign-off, continue to the cutover.
 

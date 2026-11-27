@@ -69,9 +69,9 @@ command `npm run generate`, output `.output/public`, build variables
 Pages deploy hook. Full runbook, cutover, and rollback: `DEPLOY-CLOUDFLARE.md`.
 
 Deploy order: CMS first with `CROIX_BUILD_HOOK` empty (`../croix-cms/DEPLOY.md`),
-seed and smoke-check it, create this Pages project, then set the hook. The Pages
-production branch must contain the release commit — merge `feat/headless-cms`
-to `main` first, or set the production branch accordingly.
+seed and smoke-check it, create this Pages project, then set the hook. Merge
+`feat/headless-cms` to `main` before creating the project: the Pages production
+branch is `main`, and deploy hooks are branch-scoped.
 
 ### Legacy: Hostinger static hosting (pre-cutover fallback)
 
@@ -127,9 +127,10 @@ does not serve the API; use `npx wrangler dev` with `.dev.vars`. The endpoint
 validates server-side, includes a honeypot, escapes HTML, and does not upload
 files. Add Turnstile or a KV rate limit before heavy traffic.
 
-Failure causes — a 503 means `croix-config.php` is missing or `BREVO_API_KEY` is
-empty; a 502 means Brevo rejected the message. Check hPanel → Advanced → **Error
-Logs** for a line starting `CROIX contact: Brevo HTTP`, then check:
+Failure causes — a 503 usually means `croix-config.php` is missing or
+`BREVO_API_KEY` is empty, or PHP lacks cURL; a 502 usually means Brevo rejected
+the message or the HTTP request failed. Check hPanel → Advanced → **Error Logs**
+for a line starting `CROIX contact: Brevo HTTP`, then check:
 
 - the key is an SMTP key (`xsmtpsib-…`) instead of an HTTP API key
   (`xkeysib-…`);
