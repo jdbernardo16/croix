@@ -23,7 +23,9 @@ const copy = {
 
 const email = cmsText(site.email)
 const emailHref = `mailto:${email}`
-const address = cmsLines(site.manilaAddress).join(', ')
+const address = cmsLines(site.manilaAddress)
+  .map((line) => line.replace(/,+$/, ''))
+  .join(', ')
 </script>
 
 <template>
