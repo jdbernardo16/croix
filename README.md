@@ -15,13 +15,15 @@ Build-time pull, not runtime API calls:
 2. `scripts/cms-snapshot.mjs` splits it into one file per section in
    `app/data/generated/` (`site.json`, `home.json`, `work.json`,
    `projects.json`, `services.json`, `studio.json`, `team.json`,
-   `contact.json`, `legal.json`) so a page bundles only what it imports.
+   `contact.json`, `legal.json`) plus a combined `cms.json` for docs/tests, so a
+   page bundles only what it imports.
 3. Pages read those files through the typed modules in `app/data/` (for example
    `app/data/home.ts`). `app/data/content.ts` is kept for docs and tests only;
    pages no longer import it.
 4. When the CMS is unreachable and `CMS_ALLOW_FALLBACK=1`, the build restores
-   the committed snapshot in `app/data/fallback/` instead. `npm run dev` does
-   this whenever `app/data/generated/` is missing, so a clean checkout runs
+   the committed per-section files in `app/data/fallback/` (one JSON per
+   section plus `meta.json`) instead. `npm run dev` does this whenever
+   `app/data/generated/` is missing or incomplete, so a clean checkout runs
    offline.
 
 `app/data/generated/` and `public/uploads/cms/` are gitignored build artifacts.
@@ -35,13 +37,13 @@ the default copy.
 | `npm run cms:pull` | Pull CMS content only (`prebuild` and `pregenerate` run it automatically) |
 | `npm run dev` | Seed missing generated data from the fallback, then Nuxt on :3030 |
 | `npm run generate` | Pull CMS content, then `nuxt generate --preset static` → `.output/public` |
-| `npm run preview` | Serve the generated output |
+| `python3 -m http.server 3000 --directory .output/public` | Serve the generated build locally (`npm run preview` does not work with the static preset) |
 | `npm run package:hostinger` | Generate, then zip `.output/public` for the legacy Hostinger host |
 | `npm run deploy` | Deploy the Cloudflare Worker variant (`worker/index.ts`) |
 
 | Variable | Meaning |
 | --- | --- |
-| `CMS_GRAPHQL_URL` | CMS endpoint; production `https://cms.croixlighting.com.ph/graphql`, local `http://localhost:8000/public/graphql` |
+| `CMS_GRAPHQL_URL` | CMS endpoint; production `https://cms.croixlighting.com.ph/graphql` (assumed hostname), local `http://localhost:8000/graphql` |
 | `CMS_ALLOW_FALLBACK` | `1` builds from `app/data/fallback/` when the CMS is unreachable; `0` fails instead |
 
 Both are read from the process environment first, then from `.env`; see
@@ -66,6 +68,11 @@ command `npm run generate`, output `.output/public`, build variables
 `CMS_GRAPHQL_URL` and `CMS_ALLOW_FALLBACK=0`. The CMS publish hook triggers a
 Pages deploy hook. Full runbook, cutover, and rollback: `DEPLOY-CLOUDFLARE.md`.
 
+Deploy order: CMS first with `CROIX_BUILD_HOOK` empty (`../croix-cms/DEPLOY.md`),
+seed and smoke-check it, create this Pages project, then set the hook. The Pages
+production branch must contain the release commit — merge `feat/headless-cms`
+to `main` first, or set the production branch accordingly.
+
 ### Legacy: Hostinger static hosting (pre-cutover fallback)
 
 This is the current production host until the Cloudflare cutover is signed off,
@@ -86,8 +93,9 @@ rewrite, HTTPS, apex → `www`, the 404 page, cache headers, and compression.
 
 PHP and the Brevo key:
 
-1. hPanel → Advanced → **PHP Configuration** → PHP 8.1 or newer; cURL is on by
-   default.
+1. hPanel → Advanced → **PHP Configuration** → PHP 8.1 or newer for the static
+   site's contact endpoint. This setting is separate from the CMS subdomain,
+   which needs PHP 8.3+; set each domain's PHP version independently.
 2. Create `croix-config.php` from `deploy/hostinger/croix-config.example.php` —
    one level above public_html for the main domain, inside the subdomain
    docroot for a subdomain. It holds `BREVO_API_KEY`, `CONTACT_TO`, and
@@ -108,11 +116,30 @@ All three transports send through Brevo's **HTTP API**; none uses SMTP:
 - `functions/api/contact.ts` — Cloudflare Pages (auto-detected `functions/`).
 - `worker/index.ts` — Cloudflare Workers (`npm run deploy`).
 
+**Revoke the SMTP key that was shared in chat. Treat it as compromised.** If it
+was already revoked, record the date and who revoked it in the deployment notes.
+Then create an HTTP API key in Brevo (Settings → SMTP & API → **API keys**); it
+starts with `xkeysib-`. Verify `CONTACT_FROM` under Brevo → Senders & Domains.
+
 Runtime variables: `BREVO_API_KEY` (the `xkeysib-…` HTTP key, not the
 `xsmtpsib-…` SMTP key), `CONTACT_TO`, `CONTACT_FROM`. Locally, `npm run dev`
 does not serve the API; use `npx wrangler dev` with `.dev.vars`. The endpoint
 validates server-side, includes a honeypot, escapes HTML, and does not upload
 files. Add Turnstile or a KV rate limit before heavy traffic.
+
+Failure causes — a 503 means `croix-config.php` is missing or `BREVO_API_KEY` is
+empty; a 502 means Brevo rejected the message. Check hPanel → Advanced → **Error
+Logs** for a line starting `CROIX contact: Brevo HTTP`, then check:
+
+- the key is an SMTP key (`xsmtpsib-…`) instead of an HTTP API key
+  (`xkeysib-…`);
+- `CONTACT_FROM` is not a verified Brevo sender;
+- the API key has an IP restriction — allow the Hostinger server IP or remove
+  it;
+- the Brevo account is not activated, or sending is suspended.
+
+To see the exact response, set `'DEBUG' => true` in `croix-config.php`, submit
+once, read `brevo_status`/`brevo_message`, then set it back to `false`.
 
 ## Structure
 
