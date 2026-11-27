@@ -1,15 +1,52 @@
-# CROIX — Website Design Peg
+# CROIX — Lighting Design Studio site
 
-A working design direction for the CROIX Lighting Design Studio website, built with Nuxt 4 and Tailwind CSS 4. This is a **peg**, not the production site: it proves the visual system, the page rhythm, and the interaction model on one homepage, plus a reference board at `/pegs`.
+Nuxt 4 + Tailwind CSS 4 marketing site for CROIX Lighting Design Studio. The
+site is a fully static build; copy, images, projects, team, and navigation are
+edited in the SilverStripe CMS (`../croix-cms/`) and pulled in at build time.
+The browser never calls the CMS.
 
-## Preview without running it
+## Content pipeline
 
-Static captures are in `preview/`:
+Build-time pull, not runtime API calls:
 
-- `01-home.jpg`, `02-disciplines.jpg`, `03-work.jpg`, `03b-work-hover-ccp.jpg`, `04-evidence.jpg`
-- `06-contact.jpg`, `07-footer.jpg`
-- `08-pegs.jpg`, `09-pegs-refs.jpg`, `10-pegs-interaction.jpg`
-- `11-mobile.jpg`, `12-mobile-disciplines.jpg`
+1. `scripts/cms-pull.mjs` queries the CMS GraphQL endpoint (`CMS_GRAPHQL_URL`),
+   normalises every page and project, downloads referenced images into
+   `public/uploads/cms/`, and writes a snapshot.
+2. `scripts/cms-snapshot.mjs` splits it into one file per section in
+   `app/data/generated/` (`site.json`, `home.json`, `work.json`,
+   `projects.json`, `services.json`, `studio.json`, `team.json`,
+   `contact.json`, `legal.json`) so a page bundles only what it imports.
+3. Pages read those files through the typed modules in `app/data/` (for example
+   `app/data/home.ts`). `app/data/content.ts` is kept for docs and tests only;
+   pages no longer import it.
+4. When the CMS is unreachable and `CMS_ALLOW_FALLBACK=1`, the build restores
+   the committed snapshot in `app/data/fallback/` instead. `npm run dev` does
+   this whenever `app/data/generated/` is missing, so a clean checkout runs
+   offline.
+
+`app/data/generated/` and `public/uploads/cms/` are gitignored build artifacts.
+`app/data/fallback/` is committed and must be refreshed when a release changes
+the default copy.
+
+### Commands and environment
+
+| Command | What it does |
+| --- | --- |
+| `npm run cms:pull` | Pull CMS content only (`prebuild` and `pregenerate` run it automatically) |
+| `npm run dev` | Seed missing generated data from the fallback, then Nuxt on :3030 |
+| `npm run generate` | Pull CMS content, then `nuxt generate --preset static` → `.output/public` |
+| `npm run preview` | Serve the generated output |
+| `npm run package:hostinger` | Generate, then zip `.output/public` for the legacy Hostinger host |
+| `npm run deploy` | Deploy the Cloudflare Worker variant (`worker/index.ts`) |
+
+| Variable | Meaning |
+| --- | --- |
+| `CMS_GRAPHQL_URL` | CMS endpoint; production `https://cms.croixlighting.com.ph/graphql`, local `http://localhost:8000/public/graphql` |
+| `CMS_ALLOW_FALLBACK` | `1` builds from `app/data/fallback/` when the CMS is unreachable; `0` fails instead |
+
+Both are read from the process environment first, then from `.env`; see
+`.env.example`. With `CMS_GRAPHQL_URL` unset the build always uses the fallback,
+even when `CMS_ALLOW_FALLBACK=0`, so a production build needs the variable set.
 
 ## Run it
 
@@ -19,228 +56,106 @@ npm run dev        # http://localhost:3030
 npm run generate   # static build in .output/public
 ```
 
-## Deploy to Hostinger (shared hosting)
+For content editing locally, run the CMS as well — see
+`../croix-cms/README.md`.
 
-The site is a fully static Nuxt build. Hostinger serves it from the folder mapped to the domain or subdomain; the only server-side code is `public/api/contact.php`, which emails enquiries through Brevo's HTTP API. No Node runtime is needed on the host.
+## Deploy
 
-### 1. Build the upload package
+**Primary: Cloudflare Pages.** Pages project from the `croix` GitHub repo, build
+command `npm run generate`, output `.output/public`, build variables
+`CMS_GRAPHQL_URL` and `CMS_ALLOW_FALLBACK=0`. The CMS publish hook triggers a
+Pages deploy hook. Full runbook, cutover, and rollback: `DEPLOY-CLOUDFLARE.md`.
 
-```bash
-npm run package:hostinger
-```
+### Legacy: Hostinger static hosting (pre-cutover fallback)
 
-This runs `nuxt generate --preset static` (36 routes) and writes `croix-hostinger.zip` (about 4 MB). The `--preset static` flag matters: without it, a Cloudflare build environment sets `NITRO_PRESET=cloudflare-module` and only two routes are generated.
+This is the current production host until the Cloudflare cutover is signed off,
+and the rollback target afterwards. It serves `.output/public` with no Node
+runtime; the only server-side code is `public/api/contact.php`, which emails
+enquiries through Brevo's HTTP API.
 
-### 2. Upload
+1. Build: `npm run package:hostinger` (runs the CMS pull first — set
+   `CMS_GRAPHQL_URL` to publish current CMS copy, or leave it unset to publish
+   the committed fallback).
+2. hPanel → Files → **File Manager** → open the document root (public_html
+   for the main domain, or the folder shown for a subdomain).
+3. Upload croix-hostinger.zip, **Extract** it there, delete the zip. Confirm
+   index.html, .htaccess, api/, _nuxt/, and work/ sit directly in the docroot.
 
-1. hPanel → Files → **File Manager** → open the document root for the site:
-   - main domain: usually `public_html`
-   - subdomain: the folder hPanel shows for it, e.g. `public_html/__croix`
-2. Delete Hostinger's default `index.html` / `default.php` if present.
-3. Upload `croix-hostinger.zip`, then **Extract** into that folder, then delete the zip.
-4. Confirm `index.html`, `.htaccess`, `api/`, `_nuxt/`, and `work/` sit directly in the document root — not inside a nested folder.
-5. In File Manager settings, enable **Show hidden files** so `.htaccess` is visible and editable.
+Hostinger runs LiteSpeed, which reads `public/.htaccess`: the `/api/contact`
+rewrite, HTTPS, apex → `www`, the 404 page, cache headers, and compression.
 
-Hostinger runs LiteSpeed, which reads `.htaccess`. It handles the `/api/contact` rewrite, HTTPS, apex → `www`, the 404 page, cache headers, and compression.
+PHP and the Brevo key:
 
-### 3. Subdomain or subfolder install
+1. hPanel → Advanced → **PHP Configuration** → PHP 8.1 or newer; cURL is on by
+   default.
+2. Create `croix-config.php` from `deploy/hostinger/croix-config.example.php` —
+   one level above public_html for the main domain, inside the subdomain
+   docroot for a subdomain. It holds `BREVO_API_KEY`, `CONTACT_TO`, and
+   `CONTACT_FROM`; it is gitignored and denied by `.htaccess`.
+3. Verify `CONTACT_FROM` as a Brevo sender. A missing config returns 503; a
+   Brevo rejection returns 502 and logs `CROIX contact: Brevo HTTP`.
 
-For a subdomain such as `https://croix.project-uat.online/` whose docroot is `/public_html/__croix/`:
+UAT noindex: append `deploy/hostinger/uat-noindex.conf` to `.htaccess` and
+replace `public/robots.txt` with `deploy/hostinger/uat-robots.txt`. Remove both
+for production. Update the site by repeating step 1 and extracting over the
+existing files; `croix-config.php` is not in the package, so it survives.
 
-- Extract the zip into `public_html/__croix/`, **not** into `public_html/`. The folder name is only the docroot; the URL is the subdomain root, so no `baseURL` change is needed.
-- Put `croix-config.php` **inside `__croix/`**, next to `index.html`. The bundled `.htaccess` denies direct requests to it and PHP never prints its contents. One level above `__croix` is the main site's `public_html`, so do not put the key there.
-- `.htaccess` needs no edits: the API rewrite is relative, and the apex → `www` rule only fires for `croixlighting.com.ph`.
-- Install a separate SSL certificate for the subdomain in hPanel.
-- This is a UAT host, so keep it out of search results: append `deploy/hostinger/uat-noindex.conf` to `.htaccess` and replace `robots.txt` with `deploy/hostinger/uat-robots.txt`. Remove both for production.
-- `sitemap.xml` still lists the production URLs. That is fine while the UAT site is noindexed; regenerate it with the real host before a production subdomain launch.
+### Contact handler
 
-If the site is served from a **subfolder of a URL** (e.g. `https://example.com/croix/`) instead of a subdomain, set `app.baseURL = '/croix/'` in `nuxt.config.ts` and rebuild.
+All three transports send through Brevo's **HTTP API**; none uses SMTP:
 
-### 4. PHP and the Brevo key
+- `public/api/contact.php` — Hostinger.
+- `functions/api/contact.ts` — Cloudflare Pages (auto-detected `functions/`).
+- `worker/index.ts` — Cloudflare Workers (`npm run deploy`).
 
-1. hPanel → Advanced → **PHP Configuration** → select PHP 8.1 or newer. The endpoint needs the cURL extension, which Hostinger enables by default.
-2. Create `croix-config.php` using `deploy/hostinger/croix-config.example.php`:
-
-   **Main domain** — one level above `public_html`:
-
-   ```
-   /home/uXXXXXXXX/domains/croixlighting.com.ph/croix-config.php
-   /home/uXXXXXXXX/domains/croixlighting.com.ph/public_html/...
-   ```
-
-   **Subdomain** — inside the subdomain docroot (protected by `.htaccess`):
-
-   ```
-   /home/uXXXXXXXX/domains/project-uat.online/public_html/__croix/croix-config.php
-   /home/uXXXXXXXX/domains/project-uat.online/public_html/__croix/index.html
-   ```
-
-   ```php
-   <?php
-   return [
-       'BREVO_API_KEY' => 'xkeysib-...',
-       'CONTACT_TO' => 'info@croixlighting.com.ph',
-       'CONTACT_FROM' => 'website@croixlighting.com.ph',
-   ];
-   ```
-
-   For UAT, point `CONTACT_TO` at your own inbox so test enquiries do not reach the client.
-
-3. In Brevo: Settings → SMTP & API → **API keys** → create a key. It starts with `xkeysib-`. The SMTP key (`xsmtpsib-…`) will not work with the HTTP API.
-4. Verify `website@croixlighting.com.ph` (or whichever `CONTACT_FROM` you use) under Brevo → Senders & Domains.
-5. **Revoke the SMTP key that was shared in chat.** Treat it as compromised.
-
-If `croix-config.php` is missing, the form returns a 503 and tells the visitor to email the studio directly.
-
-### 5. SSL and domain
-
-1. hPanel → Security → **SSL** → install the free certificate for the domain (or the subdomain) and `www` where applicable.
-2. `.htaccess` already forces HTTPS and redirects `croixlighting.com.ph` → `https://www.croixlighting.com.ph`.
-3. If the production domain is not `www.croixlighting.com.ph`, update `public/.htaccess`, `public/robots.txt`, and `public/sitemap.xml`, then rebuild.
-
-### 6. Test after upload
-
-- `/` and `/work`
-- `/work/cultural-center-philippines` and `/work/arena-di-verona`
-- `/studio` and `/studio/team`
-- `/services`
-- `/contact` — submit a real enquiry; check the inbox and the Brevo transactional log
-- `/privacy`, `/terms`, and a missing URL (should show the CROIX 404, status 404)
-- `https://` and the apex redirect
-
-### Troubleshooting the contact form
-
-The form distinguishes the two failure points:
-
-- **503** — `croix-config.php` was not found or `BREVO_API_KEY` is empty. Fix the config path.
-- **502** — the endpoint reached Brevo, but Brevo rejected the message.
-
-For a 502, check hPanel → Advanced → **Error Logs** for a line starting `CROIX contact: Brevo HTTP`. The usual causes:
-
-- The key is the SMTP key (`xsmtpsib-…`). The HTTP API needs an API key (`xkeysib-…`).
-- `CONTACT_FROM` is not a verified sender. Verify it under Brevo → Senders & Domains, or use an address that is already verified.
-- The API key has an IP restriction. Edit the key in Brevo and remove the restriction, or allow the Hostinger server IP.
-- The Brevo account is not activated, or sending is suspended.
-
-To see the exact response without opening the log, set `'DEBUG' => true` in `croix-config.php`, submit once, then set it back to `false`. The JSON will include `brevo_status` and `brevo_message`.
-
-### 7. Updating the site
-
-Rebuild and re-upload:
-
-```bash
-npm run package:hostinger
-```
-
-Upload the zip, extract over the existing files, delete the zip. `croix-config.php` survives because it is not part of the package. Hashed `_nuxt/` assets are cached for a year; old ones can be removed after a deploy.
-
-### Notes
-
-- `public/_headers` is Cloudflare-only and is ignored by LiteSpeed. `.htaccess` is the Hostinger equivalent.
-- `/pegs` is unlinked and noindexed, but it is still uploaded. Delete `pegs/` from the docroot (or remove `app/pages/pegs.vue` before building) if you do not want the internal review board public.
-- Shared hosting has no Node process, so the Cloudflare Worker in `worker/` is unused here. It stays in the repo only for the optional Cloudflare deploy below.
-
-### Alternative: Cloudflare Workers
-
-`wrangler.jsonc` + `worker/index.ts` still deploy the same static build to Workers, with `/api/contact` handled by the Worker instead of PHP. Build command `npm run generate`, deploy command `npx wrangler deploy`, and add `BREVO_API_KEY`, `CONTACT_TO`, `CONTACT_FROM` as Worker runtime variables. `functions/api/contact.ts` keeps the Pages route working too.
+Runtime variables: `BREVO_API_KEY` (the `xkeysib-…` HTTP key, not the
+`xsmtpsib-…` SMTP key), `CONTACT_TO`, `CONTACT_FROM`. Locally, `npm run dev`
+does not serve the API; use `npx wrangler dev` with `.dev.vars`. The endpoint
+validates server-side, includes a honeypot, escapes HTML, and does not upload
+files. Add Turnstile or a KV rate limit before heavy traffic.
 
 ## Structure
 
 ```
 app/
-  components/     SiteHeader, LightHero, TickerStrip, DisciplineSplit,
-                  WorkIndex, ProofStrip, ContactBlock, SiteFooter
-  pages/          index.vue (concept), pegs.vue (reference board)
-  assets/css/     Tailwind theme + custom treatments
-  plugins/        reveal.client.ts (IntersectionObserver reveals)
-worker/
-  index.ts        Cloudflare Worker: /api/contact + static assets
+  components/     SiteHeader, LightHero, DisciplineSplit, WorkIndex, ...
+  pages/          index.vue, work/, studio/, services.vue, contact.vue, ...
+  data/           per-section CMS modules, generated/, fallback/
+  types/cms.ts    CMS snapshot types
+scripts/          cms-pull.mjs, cms-snapshot.mjs, ensure-cms-data.mjs
+worker/           Cloudflare Worker contact handler + static assets
 functions/api/    Pages-compatible contact handler
-wrangler.jsonc    Workers config (name, entry, assets)
-public/
-  .htaccess       Hostinger: rewrites, HTTPS, 404, cache headers
-  api/contact.php Brevo contact endpoint (PHP, no Composer)
-  img/            logo, hero, project and reference imagery
-  _headers        Cloudflare-only headers (ignored by LiteSpeed)
-  robots.txt      /pegs excluded
-deploy/hostinger/ croix-config.example.php
+public/           .htaccess, api/contact.php, img/, uploads/cms/, sitemap.xml
+deploy/hostinger/ croix-config.example.php, UAT noindex files
 ```
 
-## Design thesis
+## Design thesis and motion
 
-**A gallery that can read a datasheet.**
+**A gallery that can read a datasheet.** Three registers, one voice: **Gallery
+Daylight** (Gallery Alabaster, Plaster Mist, Darkroom type, Kelvin Bronze
+accents; Manrope 200/300 display, Inter 300 body, IBM Plex Mono measurements),
+**Nocturne** (hero plates, one warm image, captions in the penumbra), and
+**Precision** (Cast Charcoal, AISI 316L alloy, one category accent).
 
-The company profile is full of hard proof — UGR < 19, DIALux plates, IP66/67, AISI 316L, 35–55% fee savings — but its PDF design (green headings, brush type, gold triangles) fights the 2026 brand guide. This peg follows the guide, not the PDF.
+Hard rules: violet `#5B21B6` lives only inside the CROIX mark; bronze is an
+accent, not body copy; hairlines dissolve; corners are 20–28px; no hard boxes or
+glass cards. Motion is one IntersectionObserver reveal system (no
+scroll-jacking), a cursor-following hero glow, a drag/keyboard discipline
+aperture, and a hover project preview — all disabled for reduced motion.
 
-Three registers, one voice:
-
-1. **Gallery Daylight** — default pages. Gallery Alabaster, Plaster Mist, Darkroom type, Kelvin Bronze accents. Manrope 200/300 for display, Inter 300 for body, IBM Plex Mono for measurements.
-2. **Nocturne** — hero plates and case-study covers. Darkroom field, one warm image, captions in the penumbra.
-3. **Precision** — industrial routes. Cast Charcoal, AISI 316L alloy, one category accent. Space Grotesk Bold headings, Plex Mono data.
-
-Hard rules carried from the guide:
-
-- Violet `#5B21B6` lives **only inside the CROIX mark** — no purple buttons, links, hovers, borders, or gradients.
-- Bronze is an **accent**, not body copy. `#B39463` on gallery white is ~2.6:1; `--color-bronze-ink` (a darker 4.7:1 variant) is used for small labels on light.
-- Hairlines dissolve; corners are 20–28px; no hard boxes, no glass cards.
-- Logo clear space is preserved in the header and footer plaque.
-
-## Interactions
-
-- **Hero light** — a soft radial glow follows the cursor across the Nocturne image (`mix-blend-mode: screen`), disabled on touch and reduced-motion.
-- **Discipline split** — drag (or keyboard) the aperture to compare the architectural and industrial systems. A native range input drives `clip-path`, so it works with touch and arrow keys. Mobile gets two stacked cards instead.
-- **Work index** — hovering a project floats a preview (real CCP/NSCR imagery or a typographic plate) near the cursor; clamped to the list bounds.
-- **Reveal system** — one IntersectionObserver, 900ms easing, no scroll-jacking. Reduced motion disables all of it.
-- **Marquee** — quiet client strip, pauses on hover.
-
-## Reference board
-
-`/pegs` groups twelve live references into Nocturne, Gallery Daylight, Precision Instrument, and Interaction — each with a “borrow” and “avoid” note. Screenshots were captured November 2026 for internal review only. Do not publish them.
-
-Primary references:
-
-- L'Observatoire International — lobsintl.com
-- Apparatus — apparatusstudio.com
-- Bocci — bocci.com
-- Davide Groppi — davidegroppi.com
-- Lambert & Fils — lambertetfils.com
-- Michael Anastassiades — michaelanastassiades.com
-- David Chipperfield Architects — davidchipperfield.com
-- Delta Light — deltalight.com
-- Teenage Engineering — teenage.engineering
-- ERCO — erco.com
-- IFI Lighting Design — ifilighting.com
-- Lampå — lampa.bornfight.studio
-
-## Contact email (Brevo)
-
-The contact form posts to `/api/contact`: `public/api/contact.php` on Hostinger, `worker/index.ts` on Cloudflare Workers, or `functions/api/contact.ts` on Cloudflare Pages. All three send through Brevo's **HTTP API**; none uses SMTP or `nodemailer`.
-
-1. **Revoke the SMTP key that was shared in chat.** Treat it as compromised.
-2. In Brevo: Settings → SMTP & API → **API keys** → create a key. It starts with `xkeysib-`. The SMTP key (`xsmtpsib-…`) will not work with the HTTP API.
-3. Verify a sender in Brevo (Senders & Domains). `website@croixlighting.com.ph` or `info@croixlighting.com.ph` must be verified before Brevo will send.
-4. On Workers: Worker → Settings → Variables and Secrets → add the three variables below for Production (and Preview if used). They are **runtime** variables, not build variables.
-   - `BREVO_API_KEY` — the `xkeysib-…` key (secret)
-   - `CONTACT_TO` — defaults to `info@croixlighting.com.ph`
-   - `CONTACT_FROM` — defaults to `website@croixlighting.com.ph` (must be a verified Brevo sender)
-5. Deploy. On Workers, `wrangler.jsonc` points at `worker/index.ts` and `.output/public`; on Pages, the root `functions/` directory is detected automatically.
-6. Local full-stack test: `npx wrangler dev` (Workers) or `npx wrangler pages dev .output/public` (Pages) with a `.dev.vars` file (gitignored). `npm run dev` serves the Nuxt app but not the API, so the form's POST will 404 locally.
-
-The function validates server-side, includes a honeypot, escapes HTML, and does not upload files. File names are included in the email; the sender is asked to email the drawings separately. Add Turnstile or a KV rate limit before heavy traffic.
+`app/pages/pegs.vue` is an internal reference board: unlinked and noindexed, but
+still shipped; delete the pegs page from the built docroot if it should not be
+public.
 
 ## Before production
 
-1. **Logo** — the header/footer mark is a raster crop from the supplied PDF. Replace with the vector master (SVG), including a reversed version for dark grounds.
-2. **Address** — the profile says 24 Saint Rita St., Parañaque 1718; the guide says Werco Arcade Lot 18, Parañaque 1715. This peg uses the guide’s address. Pick one canonical NAP.
-3. **Contact details** — profile still has placeholders. This peg uses `info@croixlighting.com.ph` and `+63 969 222 8111` from the guide.
-4. **Photography** — five of eight projects have no usable images. The work section uses the two real CCP/NSCR assets and typographic plates for the rest; commission or license the missing photography.
-5. **Industrial line** — the profile never mentions Ex-Proof, Egress, or Marine. The guide presents them as live. Confirm status before adding `/industrial`.
-6. **Forms** — the form posts to `/api/contact` and emails via Brevo. It still needs file uploads (DWG/RVT/PDF), Turnstile or rate limiting, and a real privacy-consent record.
-7. **Content** — the page-2 quote is still “insert quote here”; no testimonials, client logos, or project years exist yet.
-8. **Copy claims** — “35–55%” comes from the profile; confirm it is still approved for public use. The site says “within a few days,” matching the profile’s wording.
-
-## Imagery credits
-
-- Hero/gallery/industrial placeholders: Unsplash (free license). Replace with CROIX project photography.
-- CCP interior/exterior and NSCR imagery: extracted from the supplied CROIX company profile.
-- Logo: cropped from the supplied company profile cover.
+1. **Logo** — replace the raster crop with an SVG master, including a reversed
+   version for dark grounds.
+2. **Address** — the profile and the brand guide disagree; pick one canonical
+   NAP and enter it in the CMS SiteConfig.
+3. **Photography** — several projects have no usable images; commission or
+   license the missing shots.
+4. **Forms** — file uploads (DWG/RVT/PDF), Turnstile or rate limiting, and a
+   real privacy-consent record are still open.
+5. **Copy claims** — confirm the "35–55%" fee-savings figure is still approved
+   for public use.
