@@ -1,6 +1,8 @@
-import type { CmsAudience, CmsServicePackage } from '~/types/cms'
+import type { CmsAudience, CmsServicePackage, CmsServicesPage } from '~/types/cms'
 import { cmsList, cmsText } from '~/utils/cms'
-import { services as servicesPage } from './content'
+import snapshot from './generated/services.json'
+
+const servicesPage = snapshot as unknown as CmsServicesPage
 
 export type Audience = {
   id: string

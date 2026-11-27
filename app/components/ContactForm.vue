@@ -1,22 +1,15 @@
 <script setup lang="ts">
-import { projects as cmsProjects, services as cmsServices } from '~/data/content'
-import { cmsText } from '~/utils/cms'
+import { sectors } from '~/data/projects'
+import { packages } from '~/data/services'
 
 const route = useRoute()
 
-const packageOptions = cmsServices.packages.items
-  .map((pkg) => {
-    const value = cmsText(pkg.shortName)
-    const label = [cmsText(pkg.number), cmsText(pkg.name)].filter(Boolean).join(' — ')
-    return { value, label: label || value }
-  })
-  .filter((option) => option.value.length > 0)
-
-const sectorOptions = cmsProjects.reduce<string[]>((list, project) => {
-  const sector = cmsText(project.sector)
-  if (sector && !list.includes(sector)) list.push(sector)
-  return list
-}, [])
+// `packages` is the mapped service data: `shortName` already falls back to the
+// package name, so a package is never dropped from the select.
+const packageOptions = packages.map((pkg) => ({
+  value: pkg.shortName || pkg.name,
+  label: [pkg.number, pkg.name].filter(Boolean).join(' — ') || pkg.shortName || pkg.name,
+}))
 
 const form = reactive({
   name: '',
@@ -246,7 +239,7 @@ async function submit() {
             class="mt-2 w-full border-b border-ink/20 bg-transparent pb-2 text-sm font-light text-ink outline-none transition focus:border-ink"
           >
             <option value="">Select a sector</option>
-            <option v-for="sector in sectorOptions" :key="sector" :value="sector">{{ sector }}</option>
+            <option v-for="sector in sectors" :key="sector" :value="sector">{{ sector }}</option>
             <option value="Mixed-use">Mixed-use</option>
             <option value="Other">Other</option>
           </select>

@@ -1,0 +1,187 @@
+{
+  "meta": {
+    "title": "CROIX — Light, resolved.",
+    "description": "Turnkey architectural lighting design, photometric engineering, and control systems. Milanese design leadership, Manila delivery.",
+    "ogImage": null
+  },
+  "hero": {
+    "topBarLeft": "CROIX / Turnkey lighting & control",
+    "topBarCentre": "Manila 14.48°N 121.02°E · Milan 45.46°N 9.19°E",
+    "topBarRight": "Edition 2026",
+    "eyebrow": "Architectural lighting · Photometric engineering",
+    "titleLine1": "Light,",
+    "titleLine2": "resolved",
+    "intro": "Milanese design leadership. Manila engineering. One accountable team for lighting design, DIALux verification, controls, and commissioning — from first sketch to opening night.",
+    "primaryLabel": "Start a project",
+    "primaryUrl": "/contact",
+    "secondaryLabel": "Selected work",
+    "secondaryUrl": "/work",
+    "credentials": [
+      "UGR < 19",
+      "CRI 95+",
+      "DIALux evo verified",
+      "IP66 / IP67"
+    ],
+    "image": {
+      "src": "/img/museum-figure.jpg",
+      "width": 1800,
+      "height": 2700,
+      "title": "museum-figure"
+    },
+    "imageAlt": "A visitor looking at a painting lit by a single warm spotlight",
+    "badge": "2700K",
+    "plate": {
+      "label": "Study 01 / Nocturne",
+      "title": "One source, one subject",
+      "meta": "CRI 95+ / 24° beam"
+    },
+    "captionLeft": "Aperture 01",
+    "captionRight": "Manila / Milan"
+  },
+  "ticker": [
+    "Arena di Verona",
+    "Cultural Center of the Philippines",
+    "NSCR Malolos–Clark",
+    "Our Habitas AlUla",
+    "Benetton Group",
+    "JW Marriott Jeju",
+    "CCLEX Phase 2",
+    "Bellaroca Island Resort"
+  ],
+  "disciplines": {
+    "eyebrow": "02 / Two systems, one standard",
+    "titleLine1": "One studio.",
+    "titleLine2": "Two ways of seeing.",
+    "intro": "Museum-grade hospitality asks for softness, materiality, and restraint. Industrial infrastructure asks for proof, enclosure ratings, and zero failure. We run both from the same drawing set — without cross-contaminating the palette, the typography, or the approval path.",
+    "footerLeft": "Drag the aperture",
+    "footerRight": "Same logo. Same standard. Different room.",
+    "cards": [
+      {
+        "number": "01 / Architectural",
+        "title": "Gallery light",
+        "body": "Museums, hospitality, and heritage. Soft gradients, honest materials, and a night sky left alone.",
+        "meta": "2700K · CRI 95+ · UGR < 19",
+        "image": {
+          "src": "/img/beam-wall.jpg",
+          "width": 1800,
+          "height": 1200,
+          "title": "beam-wall"
+        },
+        "imageAlt": "Daylight falling through a quiet concrete stair"
+      },
+      {
+        "number": "02 / Industrial",
+        "title": "Precision light",
+        "body": "Explosion-proof, outdoor egress, and marine. Sealed enclosures, verified photometrics, and documents that pass inspection.",
+        "meta": "IP66/67 · IK10 · 316L",
+        "image": {
+          "src": "/img/port.jpg",
+          "width": 1800,
+          "height": 1012,
+          "title": "port"
+        },
+        "imageAlt": "Port cranes lit against a deep blue night sky"
+      }
+    ]
+  },
+  "work": {
+    "eyebrow": "03 / Selected work",
+    "title": "Light, in the field.",
+    "intro": "Heritage landmarks, luxury resorts, public transport, and workplaces — often alongside Voltaire Light Design, In-visible lab, and Sergio Boccia Lighting Design.",
+    "footerNote": "Full case studies in production",
+    "footerLinkLabel": "All projects"
+  },
+  "proof": {
+    "eyebrow": "04 / The evidence",
+    "titleLine1": "The numbers are",
+    "titleLine2": "part of the design.",
+    "intro": "Lighting is the one trade where “it looks fine” is not a submittal. Every scheme leaves the studio with illuminance values, glare limits, load schedules, and a code path.",
+    "image": {
+      "src": "/img/projects/ccp-int-false.jpg",
+      "width": 2048,
+      "height": 1422,
+      "title": "ccp-int-false"
+    },
+    "imageAlt": "DIALux false-colour illuminance map of the Cultural Center of the Philippines grand lobby",
+    "imageBadge": "DIALux evo / verified",
+    "imageCaption": "CCP Grand Lobby — false-colour illuminance",
+    "imageMeta": "UGR < 19 · 150 lx target",
+    "imageFooterLeft": "Photometric proof, not a mood board",
+    "imageFooterRight": "Sheet 01 / 05",
+    "sequenceLabel": "Delivery sequence",
+    "phaseCount": "05 phases",
+    "footerNote": "Three packages, one delivery standard",
+    "footerLinkLabel": "Explore services",
+    "stats": [
+      {
+        "value": "35–55%",
+        "label": "Lower consultancy fees",
+        "note": "Against comparable studios in North America, Europe, the Middle East, and Australia."
+      },
+      {
+        "value": "UGR < 19",
+        "label": "Glare compliance",
+        "note": "Verified in DIALux evo before a single fixture is purchased."
+      },
+      {
+        "value": "5,000 m²",
+        "label": "Volume tier",
+        "note": "Rate reductions on master plans, railways, and repetitive units."
+      },
+      {
+        "value": "05",
+        "label": "Phases, one team",
+        "note": "Concept to commissioning, with no handover gaps."
+      }
+    ],
+    "steps": [
+      {
+        "title": "Concept & simulation",
+        "note": "Dialux evo, false-colour, UGR"
+      },
+      {
+        "title": "Detailed plans",
+        "note": "RCP, aiming, beam angles, Revit"
+      },
+      {
+        "title": "Control architecture",
+        "note": "SLDs, DALI / DMX, load schedules"
+      },
+      {
+        "title": "Procurement",
+        "note": "Brand-neutral schedules, BoQ"
+      },
+      {
+        "title": "Commissioning",
+        "note": "Night aiming, lux verification, as-builts"
+      }
+    ]
+  },
+  "contact": {
+    "eyebrow": "05 / Start here",
+    "titleLine1": "Send the",
+    "titleLine2": "drawings",
+    "intro": "DWG, RVT, or PDF. Add mood images, your preferred package, and a target schedule. We will review the drawings and come back with a clear fee proposal within a few days.",
+    "email": "info@croixlighting.com.ph",
+    "formLabel": "Use the project form",
+    "checklistTitle": "What to send",
+    "checklist": [
+      "Architectural plans & RCPs",
+      "DWG, RVT, or PDF",
+      "Mood images or 3D views",
+      "Package + target schedule"
+    ],
+    "responseLabel": "Response",
+    "responseValue": "Within a few days",
+    "phoneNote": "Prefer a call? Manila +63 969 222 8111. Milan studio hours are available for European commissions."
+  },
+  "cta": {
+    "eyebrow": "Start here",
+    "title": "Send the drawings.",
+    "text": "DWG, RVT, or PDF. Add mood images, your preferred package, and a target schedule. We will review the drawings and come back with a clear fee proposal within a few days.",
+    "buttonLabel": "Start a project",
+    "buttonUrl": "/contact",
+    "email": "info@croixlighting.com.ph",
+    "phone": "+63 969 222 8111"
+  }
+}

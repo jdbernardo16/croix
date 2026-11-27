@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CmsHomePage } from '~/types/cms'
-import { home as snapshotHome } from '~/data/content'
+import { home as snapshotHome } from '~/data/home'
 import { projects } from '~/data/projects'
 import { cmsText } from '~/utils/cms'
 

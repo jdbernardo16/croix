@@ -1,9 +1,10 @@
 /**
  * Page-level content objects from the CMS snapshot.
  *
- * Leaves keep the CMS shape from `app/types/cms.ts` (`string | null`), so a
- * page resolves them with `cmsText()`, `cmsLines()`, or `cmsList()` from
- * `~/utils/cms` and never renders `null`.
+ * Each object comes from its own per-section module, so importing one page does
+ * not bundle the rest. Leaves keep the CMS shape from `app/types/cms.ts`
+ * (`string | null`); resolve them with `cmsText()`, `cmsLines()`, or `cmsList()`
+ * from `~/utils/cms` and never render `null`.
  */
 import type {
   CmsContactPage,
@@ -15,7 +16,13 @@ import type {
   CmsWorkPage,
 } from '~/types/cms'
 
-export { contact, home, legal, services, studio, team, work } from './content'
+export { contact } from './contact'
+export { home } from './home'
+export { legal } from './legal'
+export { services } from './servicesPage'
+export { studio } from './studio'
+export { team } from './teamPage'
+export { work } from './work'
 
 export type HomePageContent = CmsHomePage
 export type WorkPageContent = CmsWorkPage

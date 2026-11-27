@@ -5,7 +5,9 @@
  * Fetches every page, project, and setting from the SilverStripe GraphQL
  * endpoint, normalises the response into the shape documented in
  * `app/types/cms.ts`, downloads referenced images into `public/uploads/cms/`,
- * and writes `app/data/generated/cms.json` atomically.
+ * and writes the snapshot atomically — `app/data/generated/cms.json` plus one
+ * file per section (`site.json`, `home.json`, …) so the Nuxt app only bundles
+ * the copy a page imports.
  *
  * Environment:
  *   CMS_GRAPHQL_URL    GraphQL endpoint. Unset → copy the committed fallback.
@@ -19,14 +21,12 @@
  */
 
 import { createHash } from 'node:crypto'
-import { access, mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { readFallbackSnapshot, writeSnapshot } from './cms-snapshot.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const GENERATED_DIR = path.join(ROOT, 'app', 'data', 'generated')
-const GENERATED_FILE = path.join(GENERATED_DIR, 'cms.json')
-const FALLBACK_FILE = path.join(ROOT, 'app', 'data', 'fallback', 'content.json')
 const IMAGE_DIR = path.join(ROOT, 'public', 'uploads', 'cms')
 const IMAGE_URL_PREFIX = '/uploads/cms/'
 
@@ -1014,34 +1014,20 @@ async function localiseImages(snapshot, graphqlUrl) {
  * Output
  * ------------------------------------------------------------------ */
 
-async function writeJsonAtomically(file, contents) {
-  await mkdir(path.dirname(file), { recursive: true })
-  const temporary = `${file}.${process.pid}.tmp`
-  await writeFile(temporary, contents)
-  await rename(temporary, file)
-}
-
 async function useFallback(reason) {
-  let raw
+  let snapshot
   try {
-    raw = await readFile(FALLBACK_FILE, 'utf8')
+    snapshot = await readFallbackSnapshot()
   } catch (error) {
     throw new PullError(
-      `No CMS content available and the fallback snapshot is missing: ${FALLBACK_FILE}`,
+      `No CMS content available and the fallback snapshot is unreadable: ${error.message}`,
       { cause: error },
     )
   }
 
-  let parsed
-  try {
-    parsed = JSON.parse(raw)
-  } catch (error) {
-    throw new PullError(`Fallback snapshot is not valid JSON: ${FALLBACK_FILE}`, { cause: error })
-  }
-
-  assertSnapshot(parsed)
-  await writeJsonAtomically(GENERATED_FILE, raw)
-  console.log(`${reason} Copied fallback snapshot to app/data/generated/cms.json.`)
+  assertSnapshot(snapshot)
+  await writeSnapshot(snapshot)
+  console.log(`${reason} Seeded app/data/generated/ from the offline fallback snapshot.`)
 }
 
 /* ------------------------------------------------------------------ *
@@ -1068,9 +1054,9 @@ async function main() {
     await localiseImages(snapshot, graphqlUrl)
     assertSnapshot(snapshot)
 
-    await writeJsonAtomically(GENERATED_FILE, `${JSON.stringify(snapshot, null, 2)}\n`)
+    await writeSnapshot(snapshot)
     console.log(
-      `Wrote app/data/generated/cms.json (${snapshot.projects.length} projects, ` +
+      `Wrote app/data/generated/ (${snapshot.projects.length} projects, ` +
         `${snapshot.team.members.length} team members).`,
     )
   } catch (error) {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CmsSiteSettings } from '~/types/cms'
-import { site as snapshotSite } from '~/data/content'
+import { site as snapshotSite } from '~/data/site'
 import { cmsText } from '~/utils/cms'
 
 const props = withDefaults(

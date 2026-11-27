@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "title": "Studio — CROIX",
+    "description": "CROIX Lighting Design Studio — Milanese design leadership and Manila engineering for architectural lighting, photometric verification, and control systems.",
+    "ogImage": null
+  },
+  "hero": {
+    "section": "Studio",
+    "eyebrow": "The practice / Manila · Milan",
+    "title": "A practice built around light.",
+    "intro": "CROIX is a turnkey lighting design and engineering studio. Milanese design leadership, Manila technical delivery, and one accountable team from first sketch to opening night."
+  },
+  "who": {
+    "eyebrow": "01 / Who we are",
+    "title": "The last five percent.",
+    "lead": "You can spend months planning a building and sourcing stone, timber, and fabrics. The final appearance and comfort of that space still depend on how it is lit.",
+    "paragraphs": [
+      "Lighting determines how a room functions and looks the moment someone walks through the door. It is the difference between a hotel lobby that feels welcome, an office where people can work all day without eye strain, and a building exterior that remains safe and visible at night.",
+      "CROIX, together with our Italian sister studio LUMEA Collective, provides complete turnkey lighting and control solutions from initial concept to final installation. We combine architectural lighting design from Milan with illumination and control systems engineering in Metro Manila.",
+      "We partner with property developers, architects, interior designers, electrical contractors, engineers, and lighting suppliers around the world. Indoor light should be as comfortable as natural daylight; outdoor light should guide people safely without wasting electricity or polluting the night sky."
+    ],
+    "image": {
+      "src": "/img/gallery-stair.jpg",
+      "width": 1800,
+      "height": 1205,
+      "title": "gallery-stair"
+    },
+    "imageAlt": "Daylight falling through a quiet concrete stair",
+    "captionLeft": "Practice study",
+    "captionRight": "Manila / Milan"
+  },
+  "mission": {
+    "label": "Mission",
+    "title": "Comfortable inside. Safe outside. On time and on budget.",
+    "body": "To deliver complete turnkey lighting design, photometric engineering, and control system solutions that make indoor spaces comfortable for occupants, keep outdoor environments safe from glare and light pollution, and help construction teams complete projects on time and within budget."
+  },
+  "vision": {
+    "label": "Vision",
+    "title": "The trusted lighting partner across borders.",
+    "body": "To be the trusted global lighting and engineering partner for property developers, architects, contractors, and lighting suppliers, setting the practical standard for built environments where architectural materials, electrical systems, and human visual comfort work together reliably."
+  },
+  "timeline": {
+    "eyebrow": "02 / Origin",
+    "title": "Light, nature, and the spaces we share.",
+    "intro": "The studio grew out of visualisation, luminaire manufacturing, field research, and a Milan–Manila partnership. The through-line is the same: light has to work for the people in the room and for the sky outside it.",
+    "items": [
+      {
+        "label": "01 / Visualisation",
+        "title": "Rooms that only worked when the light was right",
+        "body": "While studying architecture at the University of Santo Tomas, Jonathan “Balong” Dela Cruz spent thousands of hours producing commissioned 3D architectural visualisations. High-end furniture and textured finishes only succeeded when the lighting was accurately placed — the observation that led him to specialise in illumination design."
+      },
+      {
+        "label": "02 / Light Plan",
+        "title": "A studio apprenticeship, and a shared standard",
+        "body": "After working with several architecture firms, Jonathan joined Light Plan, Inc., a pioneering lighting design studio at the time, and invited his former colleague Charmaine “Ming” Javier-Fornarelli to the studio. Together they contributed to the 2011 and 2016 Philippine Lighting Conferences."
+      },
+      {
+        "label": "03 / Manufacturing",
+        "title": "Learning how fixtures are actually built",
+        "body": "Jonathan moved into luminaire production and lamp distribution to understand how fixtures are engineered, sourced, and installed. That experience now informs the studio’s optical reviews, value engineering, and independent procurement policy."
+      },
+      {
+        "label": "04 / Field research",
+        "title": "The cost of over-lighting",
+        "body": "As early LED technology spread, lower electricity consumption led owners to over-light spaces with harsh, glaring fixtures. Jonathan documented the effects — indoor eye strain and outdoor light pollution — across the Sierra Madre mountains, the firefly habitats of Iwahig in Palawan, and pawikan conservation sites in La Union with CURMA. During the COVID-19 pandemic, he also documented how poorly specified household LEDs caused daily eye fatigue, headaches, and migraines."
+      },
+      {
+        "label": "05 / Milan",
+        "title": "European design leadership",
+        "body": "Charmaine became a licensed architect, practised with C.T. Onglao Architects and developer VConsunji, then moved to Italy to earn her Master’s Degree in Lighting Design and LED Technology at Politecnico di Milano. She practised in Milan with studios including Voltaire Light Design before founding LUMEA Collective."
+      },
+      {
+        "label": "06 / One practice",
+        "title": "Milan and Manila, in the same drawing set",
+        "body": "As LUMEA’s European practice grew, Charmaine needed a dedicated engineering team in the Philippines. Jonathan was building CROIX in Metro Manila around the same time. The two practices now operate as one delivery team: Milanese design direction, Manila engineering, and on-site commissioning across time zones."
+      }
+    ]
+  },
+  "model": {
+    "eyebrow": "03 / The model",
+    "titleLine1": "Milan draws.",
+    "titleLine2": "Manila resolves.",
+    "intro": "One practice, two centres of gravity. The design direction sits close to the European architecture and hospitality market; the engineering hub sits close to the drawings, contractors, and site conditions where the work is built.",
+    "cards": [
+      {
+        "label": "Milan / LUMEA Collective",
+        "meta": "Design",
+        "title": "Creative direction",
+        "body": "Principal Lighting Designer Ar. Charmaine “Ming” Javier-Fornarelli leads the design division from Milan. A Politecnico di Milano graduate and licensed architect, she sets the creative and technical standard across heritage landmarks, corporate headquarters, and luxury hospitality — often alongside European studios including Voltaire Light Design, In-visible lab, and Sergio Boccia Lighting Design.",
+        "points": [
+          "Concept, daylighting, and atmosphere",
+          "Heritage and hospitality design review",
+          "European studio collaboration",
+          "Brand-neutral fixture direction"
+        ]
+      },
+      {
+        "label": "Manila / Engineering",
+        "meta": "Delivery",
+        "title": "Technical execution",
+        "body": "The Metro Manila hub turns the design into buildable documentation: DIALux evo verification, AutoCAD and Revit layouts, control architecture, load schedules, procurement support, and on-site commissioning. Electrical engineers trained in government plan review close the loop between design intent and inspection.",
+        "points": [
+          "Photometrics and false-colour verification",
+          "RCP, SLD, cable schedules, load computations",
+          "Controls integration and programming",
+          "Nighttime aiming, lux verification, handover"
+        ]
+      }
+    ]
+  },
+  "principles": {
+    "eyebrow": "04 / Principles",
+    "title": "How we make decisions.",
+    "intro": "These are the constraints we bring to every project — before the fixture schedule, before the renders, and before the budget conversation.",
+    "items": [
+      {
+        "number": "01",
+        "title": "Human comfort first",
+        "body": "Glare, colour rendering, and vertical illuminance are treated as design constraints, not finishing touches. A room should feel comfortable after an hour, not just photogenic for a minute."
+      },
+      {
+        "number": "02",
+        "title": "Protect the night sky",
+        "body": "Outdoor light is shielded, aimed, and dimmed so it lands on people and surfaces rather than drifting upward. DarkSky principles are part of the brief, not an afterthought."
+      },
+      {
+        "number": "03",
+        "title": "Stay brand-neutral",
+        "body": "CROIX does not manufacture or sell fixtures. Schedules, Bills of Quantities, and value-engineering reviews are written without a product allegiance — so the specification is defensible."
+      },
+      {
+        "number": "04",
+        "title": "Prove it",
+        "body": "DIALux evo calculations, false-colour illuminance maps, UGR reports, load schedules, and code paths leave the studio with the design. The numbers are part of the deliverable."
+      }
+    ]
+  },
+  "standardsLabel": "Codes & standards",
+  "standards": [
+    "IES",
+    "ASHRAE 90.1",
+    "LEED",
+    "NECB",
+    "AS/NZS 1680",
+    "AS/NZS 1158",
+    "AS/NZS 2293",
+    "AS/NZS 60598",
+    "AS/NZS 62386",
+    "EN 12464-1",
+    "CIE",
+    "PEC",
+    "WELL",
+    "DarkSky"
+  ],
+  "cta": {
+    "eyebrow": "Next",
+    "title": "Bring us the drawings.",
+    "text": "Tell us where the project is, what stage it is at, and which decisions are still open. We will come back with a clear scope and fee proposal.",
+    "buttonLabel": "Start a project",
+    "buttonUrl": "/contact",
+    "email": "info@croixlighting.com.ph",
+    "phone": "+63 969 222 8111"
+  }
+}

@@ -1,6 +1,8 @@
 import type { CmsGalleryImage, CmsProject } from '~/types/cms'
 import { cmsList, cmsText } from '~/utils/cms'
-import { projects as cmsProjects } from './content'
+import snapshot from './generated/projects.json'
+
+const cmsProjects = snapshot as unknown as CmsProject[]
 
 export type Sector =
   | 'Heritage'

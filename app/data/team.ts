@@ -1,6 +1,8 @@
-import type { CmsTeamMember } from '~/types/cms'
+import type { CmsTeamMember, CmsTeamPage } from '~/types/cms'
 import { cmsList, cmsText } from '~/utils/cms'
-import { team as teamPage } from './content'
+import snapshot from './generated/team.json'
+
+const teamPage = snapshot as unknown as CmsTeamPage
 
 export type TeamMember = {
   slug: string
@@ -16,6 +18,8 @@ export type TeamMember = {
 }
 
 function toTeamMember(member: CmsTeamMember): TeamMember {
+  const projects = cmsList(member.projects)
+
   return {
     slug: member.slug,
     name: cmsText(member.name, member.shortName ?? ''),
@@ -26,7 +30,7 @@ function toTeamMember(member: CmsTeamMember): TeamMember {
     partner: member.partner,
     bio: cmsList(member.bio),
     focus: cmsList(member.focus),
-    projects: cmsList(member.projects),
+    ...(projects.length ? { projects } : {}),
   }
 }
 

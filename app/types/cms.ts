@@ -1,10 +1,13 @@
 /**
  * Shape of the build-time CMS snapshot.
  *
- * `scripts/cms-pull.mjs` writes this document to `app/data/generated/cms.json`
- * (gitignored). When it cannot reach the CMS it copies the committed
- * `app/data/fallback/content.json`, which has the same shape and points at the
- * existing `/img/...` assets.
+ * `scripts/cms-pull.mjs` writes the snapshot to `app/data/generated/` both as
+ * a combined document (`cms.json`, docs/tests only) and as one file per section
+ * (`site.json`, `home.json`, `work.json`, `projects.json`, `services.json`,
+ * `studio.json`, `team.json`, `contact.json`, `legal.json`). Each app data
+ * module imports only its section, so pages do not bundle unrelated copy.
+ * When the CMS is unreachable it seeds those files from the committed
+ * `app/data/fallback/` sections, which point at the existing `/img/...` assets.
  *
  * Image `src` values are always site-relative once the pull has run: downloaded
  * CMS images live under `/uploads/cms/`, and the fallback uses `/img/`.

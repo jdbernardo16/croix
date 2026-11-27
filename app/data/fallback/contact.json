@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "title": "Contact — CROIX",
+    "description": "Send architectural drawings, reflected ceiling plans, mood images, and your target schedule to CROIX for a lighting design or photometric verification proposal.",
+    "ogImage": null
+  },
+  "hero": {
+    "section": "Contact",
+    "eyebrow": "Start a project",
+    "title": "Send the drawings.",
+    "intro": "DWG, RVT, or PDF. Add mood images, your preferred package, and a target schedule. We will review the drawings and come back with a clear fee proposal within a few days.",
+    "stats": [
+      {
+        "value": "02",
+        "label": "Studios, one team"
+      },
+      {
+        "value": "05",
+        "label": "Leadership disciplines"
+      }
+    ]
+  },
+  "supplierNote": {
+    "label": "For suppliers & contractors",
+    "body": "Have a fixture list or a tender? Use the same form and note “supplier tender” in the project notes. Photometric verification has its own fast-track scope.",
+    "linkLabel": "See the packages",
+    "linkUrl": "/services"
+  },
+  "steps": {
+    "eyebrow": "What happens next",
+    "title": "No black box.",
+    "intro": "The first reply is not a sales deck. It is a review of your drawings, a short set of questions, and a scope that matches the stage you are actually at.",
+    "items": [
+      {
+        "number": "01",
+        "title": "We review the drawings",
+        "body": "We check the scope, the project stage, and the technical questions that need an answer before a fee can be meaningful."
+      },
+      {
+        "number": "02",
+        "title": "We confirm the brief",
+        "body": "A short call or email aligns the package, the deliverables, the schedule, and who else is in the design team."
+      },
+      {
+        "number": "03",
+        "title": "You receive a fee proposal",
+        "body": "A clear scope and fee — usually within a few days — with the assumptions and exclusions stated up front."
+      }
+    ]
+  },
+  "cta": {
+    "eyebrow": "Start here",
+    "title": "Send the drawings.",
+    "text": "DWG, RVT, or PDF. Add mood images, your preferred package, and a target schedule. We will review the drawings and come back with a clear fee proposal within a few days.",
+    "buttonLabel": "Start a project",
+    "buttonUrl": "/contact",
+    "email": "info@croixlighting.com.ph",
+    "phone": "+63 969 222 8111"
+  }
+}

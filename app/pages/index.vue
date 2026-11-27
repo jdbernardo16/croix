@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { site } from '~/data/content'
-import { home } from '~/data/pages'
+import { home } from '~/data/home'
+import { site } from '~/data/site'
 import { cmsText } from '~/utils/cms'
 
 useHead({

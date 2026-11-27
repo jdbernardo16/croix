@@ -1,0 +1,51 @@
+{
+  "name": "CROIX Lighting Design Studio",
+  "tagline": "Light, resolved.",
+  "footerIntro": "Turnkey lighting design, photometric engineering, and control systems. Milanese design leadership with Manila engineering and on-site delivery.",
+  "email": "info@croixlighting.com.ph",
+  "phone": "+63 969 222 8111",
+  "manilaAddress": "Werco Arcade Lot 18,\nDr. A. Santos Ave., San Antonio 1,\nParañaque City 1715, PH",
+  "milanStudio": "LUMEA Collective",
+  "milanCountry": "Milan, Italy",
+  "manilaCoordinates": "14.48°N 121.02°E",
+  "milanCoordinates": "45.46°N 9.19°E",
+  "edition": "2026",
+  "copyright": "© 2026 CROIX Lighting Design Studio",
+  "responseTime": "Within a few days",
+  "defaultMetaDescription": "CROIX Lighting Design Studio — architectural lighting, photometric engineering, and control systems. Milan design leadership, Manila delivery.",
+  "wordmark": null,
+  "lockup": null,
+  "defaultOgImage": null,
+  "nav": [
+    {
+      "label": "Work",
+      "url": "/work",
+      "sortOrder": 1,
+      "showInFooter": true
+    },
+    {
+      "label": "Services",
+      "url": "/services",
+      "sortOrder": 2,
+      "showInFooter": true
+    },
+    {
+      "label": "Studio",
+      "url": "/studio",
+      "sortOrder": 3,
+      "showInFooter": true
+    },
+    {
+      "label": "Team",
+      "url": "/studio/team",
+      "sortOrder": 4,
+      "showInFooter": true
+    },
+    {
+      "label": "Contact",
+      "url": "/contact",
+      "sortOrder": 5,
+      "showInFooter": true
+    }
+  ]
+}

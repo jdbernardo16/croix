@@ -1,20 +1,22 @@
 #!/usr/bin/env node
 /**
- * Restore the committed CMS fallback when no generated snapshot exists yet.
+ * Restore the committed CMS fallback when the generated section files do not
+ * exist yet.
  *
  * Runs as `predev`, so a clean checkout can start `npm run dev` without a CMS
- * (or a prior `npm run cms:pull`). It never overwrites an existing generated
- * snapshot.
+ * (or a prior `npm run cms:pull`). It never overwrites a complete generated
+ * snapshot; a partial one is replaced from the fallback.
  */
 
-import { access, copyFile, mkdir } from 'node:fs/promises'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const GENERATED_DIR = path.join(ROOT, 'app', 'data', 'generated')
-const GENERATED_FILE = path.join(GENERATED_DIR, 'cms.json')
-const FALLBACK_FILE = path.join(ROOT, 'app', 'data', 'fallback', 'content.json')
+import { access } from 'node:fs/promises'
+import {
+  GENERATED_DIR,
+  GENERATED_FILE,
+  SECTIONS,
+  readFallbackSnapshot,
+  sectionFile,
+  writeSnapshot,
+} from './cms-snapshot.mjs'
 
 async function exists(file) {
   try {
@@ -25,19 +27,27 @@ async function exists(file) {
   }
 }
 
+async function generatedSnapshotIsComplete() {
+  const files = [
+    GENERATED_FILE,
+    ...SECTIONS.map((section) => sectionFile(GENERATED_DIR, section)),
+  ]
+
+  for (const file of files) {
+    if (!(await exists(file))) return false
+  }
+  return true
+}
+
 async function main() {
-  if (await exists(GENERATED_FILE)) {
-    console.log('CMS data present at app/data/generated/cms.json.')
+  if (await generatedSnapshotIsComplete()) {
+    console.log('CMS data present at app/data/generated/.')
     return
   }
 
-  if (!(await exists(FALLBACK_FILE))) {
-    throw new Error(`Missing fallback snapshot: ${FALLBACK_FILE}`)
-  }
-
-  await mkdir(GENERATED_DIR, { recursive: true })
-  await copyFile(FALLBACK_FILE, GENERATED_FILE)
-  console.log('Seeded app/data/generated/cms.json from the offline fallback snapshot.')
+  const snapshot = await readFallbackSnapshot()
+  await writeSnapshot(snapshot)
+  console.log('Seeded app/data/generated/ from the offline fallback snapshot.')
 }
 
 main().catch((error) => {

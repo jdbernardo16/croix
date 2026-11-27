@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CmsHomePage } from '~/types/cms'
-import { home as snapshotHome } from '~/data/content'
+import { home as snapshotHome } from '~/data/home'
 import { cmsList, cmsText } from '~/utils/cms'
 
 const props = withDefaults(

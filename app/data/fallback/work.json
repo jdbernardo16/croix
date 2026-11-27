@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "title": "Work — CROIX",
+    "description": "Selected CROIX projects across heritage, hospitality, transport, workplace, and retail — in the Philippines, Italy, Saudi Arabia, and South Korea.",
+    "ogImage": null
+  },
+  "hero": {
+    "section": "Work",
+    "eyebrow": "Selected work / 08 projects",
+    "title": "Light, in the field.",
+    "intro": "Heritage landmarks, luxury resorts, public transport, workplaces, and retail — often alongside Voltaire Light Design, In-visible lab, and Sergio Boccia Lighting Design."
+  },
+  "stats": [
+    {
+      "value": "08",
+      "label": "Projects",
+      "note": null
+    },
+    {
+      "value": "04",
+      "label": "Countries",
+      "note": null
+    },
+    {
+      "value": "05",
+      "label": "Sectors",
+      "note": null
+    },
+    {
+      "value": "02",
+      "label": "Studios, one team",
+      "note": null
+    }
+  ],
+  "note": {
+    "label": "A note on imagery",
+    "body": "Where project photography is still being cleared, the project is presented as a typographic light study. The work and the scope are real; the image is pending. CCP and NSCR include CROIX documentation and DIALux verification plates."
+  },
+  "cta": {
+    "eyebrow": "Next project",
+    "title": "Add your building to the set.",
+    "text": "Send the drawings, the stage, and the decisions still open. We will recommend a scope and a fee.",
+    "buttonLabel": "Start a project",
+    "buttonUrl": "/contact",
+    "email": "info@croixlighting.com.ph",
+    "phone": "+63 969 222 8111"
+  }
+}

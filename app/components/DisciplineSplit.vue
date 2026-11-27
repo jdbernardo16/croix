@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CmsDisciplineCard, CmsHomePage } from '~/types/cms'
-import { home as snapshotHome } from '~/data/content'
+import { home as snapshotHome } from '~/data/home'
 import { cmsText } from '~/utils/cms'
 
 const props = withDefaults(

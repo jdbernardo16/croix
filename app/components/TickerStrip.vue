@@ -16,7 +16,7 @@ const props = defineProps<{
   items?: string[]
 }>()
 
-const list = computed(() => cmsList(props.items))
+const list = computed(() => cmsList(props.items, fallbackItems))
 </script>
 
 <template>
