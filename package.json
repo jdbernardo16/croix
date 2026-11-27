@@ -6,6 +6,7 @@
     "predev": "node scripts/ensure-cms-data.mjs",
     "dev": "nuxt dev --port 3030",
     "cms:pull": "node scripts/cms-pull.mjs",
+    "check:content": "node scripts/check-content-safety.mjs",
     "prebuild": "node scripts/cms-pull.mjs",
     "build": "nuxt build",
     "pregenerate": "node scripts/cms-pull.mjs",
@@ -20,6 +21,7 @@
     "@fontsource-variable/space-grotesk": "^5.2.0",
     "@fontsource/ibm-plex-mono": "^5.2.0",
     "nuxt": "^4.7.0",
+    "sanitize-html": "^2.18.2",
     "vue": "^3.5.0",
     "vue-router": "^4.6.0"
   },

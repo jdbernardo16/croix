@@ -10,10 +10,13 @@
  * the copy a page imports.
  *
  * Environment:
- *   CMS_GRAPHQL_URL    GraphQL endpoint. Unset → copy the committed fallback.
+ *   CMS_GRAPHQL_URL    GraphQL endpoint. Required for CI and for builds with
+ *                      fallback disabled; unset is only allowed for an
+ *                      intentional offline build with CMS_ALLOW_FALLBACK on.
  *   CMS_ALLOW_FALLBACK 1/true/yes → copy the fallback when the CMS is
- *                     unreachable or an image cannot be downloaded. Content
- *                     validation failures never fall back silently.
+ *                     unreachable, an image cannot be downloaded, or the URL
+ *                     is unset. Content validation failures never fall back
+ *                     silently.
  *
  * Variables are read from the process environment first, then from `.env`
  * (never overriding an existing variable). Nuxt also loads `.env` at runtime,
@@ -25,6 +28,7 @@ import { access, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readFallbackSnapshot, writeSnapshot } from './cms-snapshot.mjs'
+import { sanitizeLegalHtml } from './sanitize-legal.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const IMAGE_DIR = path.join(ROOT, 'public', 'uploads', 'cms')
@@ -792,7 +796,9 @@ function normaliseLegal(page) {
     meta: normaliseMeta(page),
     hero: normaliseHero(page),
     lastUpdated: text(page.LastUpdated),
-    content: text(page.Content),
+    // The legal body is rendered with v-html on the public site. Strip
+    // anything outside the allowlist before the snapshot is written.
+    content: sanitizeLegalHtml(text(page.Content)),
   }
 }
 
@@ -1039,7 +1045,18 @@ async function main() {
   const { graphqlUrl, allowFallback } = readConfig()
 
   if (!graphqlUrl) {
-    await useFallback('CMS_GRAPHQL_URL is not set.')
+    // A production/CI build must never silently publish the committed
+    // snapshot: an unset variable is a configuration mistake, not an offline
+    // build. Only an explicit local fallback build may use it.
+    if (!allowFallback || process.env.CI) {
+      throw new PullError(
+        'CMS_GRAPHQL_URL is not set. The build would publish the committed fallback ' +
+          'snapshot. Set CMS_GRAPHQL_URL, or set CMS_ALLOW_FALLBACK=1 to build from ' +
+          'the fallback intentionally.'
+      )
+    }
+
+    await useFallback('CMS_GRAPHQL_URL is not set and CMS_ALLOW_FALLBACK is set.')
     return
   }
 

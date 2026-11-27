@@ -47,8 +47,9 @@ the default copy.
 | `CMS_ALLOW_FALLBACK` | `1` builds from `app/data/fallback/` when the CMS is unreachable; `0` fails instead |
 
 Both are read from the process environment first, then from `.env`; see
-`.env.example`. With `CMS_GRAPHQL_URL` unset the build always uses the fallback,
-even when `CMS_ALLOW_FALLBACK=0`, so a production build needs the variable set.
+`.env.example`. An unset `CMS_GRAPHQL_URL` fails the build unless
+`CMS_ALLOW_FALLBACK=1` and `CI` is not set, so a production or CI build cannot
+silently publish the committed fallback snapshot.
 
 ## Run it
 
@@ -81,8 +82,9 @@ runtime; the only server-side code is `public/api/contact.php`, which emails
 enquiries through Brevo's HTTP API.
 
 1. Build: `npm run package:hostinger` (runs the CMS pull first — set
-   `CMS_GRAPHQL_URL` to publish current CMS copy, or leave it unset to publish
-   the committed fallback).
+   `CMS_GRAPHQL_URL` to publish current CMS copy, or set
+   `CMS_ALLOW_FALLBACK=1` and leave it unset to publish the committed fallback
+   intentionally).
 2. hPanel → Files → **File Manager** → open the document root (public_html
    for the main domain, or the folder shown for a subdomain).
 3. Upload croix-hostinger.zip, **Extract** it there, delete the zip. Confirm

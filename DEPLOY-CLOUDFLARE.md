@@ -61,10 +61,10 @@ Notes:
 - `CMS_ALLOW_FALLBACK=0` makes the build fail when the CMS is unreachable, so
   stale fallback content is never published silently. Content validation
   failures never fall back either.
-- **Gotcha:** if `CMS_GRAPHQL_URL` is missing, the pull script does not fail —
-  it copies the committed offline snapshot. Confirm the variable exists and
-  that the build log starts with `Pulling CMS content from` followed by the CMS
-  URL.
+- If `CMS_GRAPHQL_URL` is missing, the pull script exits non-zero (Pages sets
+  `CI`), so the build cannot publish the committed offline snapshot by
+  accident. Confirm the build log starts with `Pulling CMS content from`
+  followed by the CMS URL.
 - These are build-time variables, not runtime secrets. Within this build
   configuration the deploy hook URL (§3) is the only secret; the Brevo key (§4)
   is a separate runtime secret.

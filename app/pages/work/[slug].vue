@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getProject, projects, relatedProjects } from '~/data/projects'
 import { cmsText } from '~/utils/cms'
+import { serializeJsonLd } from '~/utils/jsonld'
 
 const route = useRoute()
 const project = getProject(String(route.params.slug))
@@ -34,7 +35,7 @@ useHead({
   script: [
     {
       type: 'application/ld+json',
-      innerHTML: JSON.stringify({
+      innerHTML: serializeJsonLd({
         '@context': 'https://schema.org',
         '@type': 'CreativeWork',
         name: project.name,
