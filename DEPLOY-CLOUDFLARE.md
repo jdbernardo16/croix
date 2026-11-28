@@ -13,11 +13,11 @@ Prerequisites:
 - The CMS is deployed, seeded, and answering
   `https://cms.croixlighting.com.ph/graphql` (assumed hostname) — see
   `../croix-cms/DEPLOY.md`.
-- **The release branch `feat/headless-cms` is merged to `main` before the Pages
-  project is created.** `main` is at `7395c04` and does not contain the headless
-  work; a build from `main` today would ship the old static site. The Pages
-  production branch is `main` from the first build.
-- The `croix` repository (`github.com/jdbernardo16/croix`) is pushed.
+- The `croix` repository (`github.com/jdbernardo16/croix`) is pushed, with the
+  work on `dev`. The staging phase below builds Pages from `dev`; `main` is the
+  production branch and is switched only after staging sign-off.
+- Deploy hooks are branch-scoped. When the production branch changes from `dev`
+  to `main`, create a new hook and update `CROIX_BUILD_HOOK`.
 - A Cloudflare account with a Pages project allowed.
 
 ## 1. Create the Pages project
@@ -28,7 +28,7 @@ Git**:
 | Setting | Value |
 | --- | --- |
 | Repository | `jdbernardo16/croix` |
-| Production branch | `main` |
+| Production branch | `dev` (staging phase; switch to `main` at cutover) |
 | Framework preset | None (custom commands below) |
 | Root directory | `/` |
 | Build command | `npm run generate` |
@@ -72,9 +72,9 @@ Notes:
 ## 3. Deploy hook for CMS publishes
 
 1. Pages project → Settings → **Builds & deployments** → **Deploy hooks** →
-   add a hook for the production branch (`main`). Deploy hooks are
-   branch-scoped: if the production branch ever changes, create a new hook and
-   update `CROIX_BUILD_HOOK`.
+   add a hook for the current production branch (`dev` during staging). Deploy
+   hooks are branch-scoped: when you switch production to `main` at cutover,
+   create a new hook and update `CROIX_BUILD_HOOK`.
 2. Copy the generated URL. It contains a token: treat it as a secret and never
    commit it.
 3. Put it in the CMS `.env` as `CROIX_BUILD_HOOK` (`../croix-cms/DEPLOY.md`
@@ -86,11 +86,11 @@ vendor/bin/sake tasks:trigger-build
 
 Trigger is a POST with `{"source":"croix-cms","event":"publish"}` (or
 `unpublish`, `siteconfig`, `navitem`), behind a leading-edge 60-second throttle
-in the CMS. Publishing in the CMS should start one Pages build **of the
-production branch (`main`)**, so the change appears on the production
-`*.pages.dev` deployment (`https://<project>.pages.dev`), not on a preview URL.
-To see a CMS change on a preview deployment, push the preview branch after the
-publish.
+in the CMS. Publishing in the CMS should start one Pages build **of the current
+production branch (`dev` during staging)**, so the change appears on the
+production `*.pages.dev` deployment (`https://<project>.pages.dev`), not on a
+preview URL. After the switch to `main`, the new hook rebuilds `main`. To see a
+CMS change on a preview deployment, push the preview branch after the publish.
 
 ## 4. Contact form on Pages
 
@@ -110,9 +110,9 @@ Set these runtime variables for **Production and Preview**:
 `public/_headers` is copied into the build and applies the security, cache, and
 `/pegs` noindex headers on Pages.
 
-## 5. Preview verification (before any DNS change)
+## 5. Staging verification on `dev` (before any DNS change)
 
-Push `main`; that builds the production deployment
+Push `dev`; that builds the staging deployment
 (`https://<project>.pages.dev`). Non-production branches, if any, get preview
 URLs (`https://<hash>.<project>.pages.dev`). Wait for the build, then check:
 
@@ -121,18 +121,32 @@ URLs (`https://<hash>.<project>.pages.dev`). Wait for the build, then check:
 - A missing URL returns the static 404 page with status 404.
 - Images load from `/uploads/cms/<hash>.jpg` — not from the CMS host. The build
   must contain no `cms.croixlighting.com.ph` image URLs.
-- Copy matches the CMS. Change one field in `/admin` and publish: the hook
-  rebuilds `main`, so confirm the change on the production deployment.
+- Copy matches the CMS. Change one field in `/admin` and publish: the `dev` hook
+  rebuilds the staging deployment, so confirm the change on `*.pages.dev`.
 - If you verify on a preview branch instead, push that branch after the publish;
-  the hook rebuilds `main` only.
+  the hook rebuilds the current production branch only.
 - Contact form: submit a real enquiry; check the inbox and the Brevo log.
 - Mobile width and `https://` on the deployment hostname.
 
 Only after sign-off, continue to the cutover.
 
-## 6. Custom domain cutover
+## 6. Switch to main and cut over custom domains
 
-Nothing here is done until preview passes and the client signs off.
+Nothing here is done until the `dev` staging deployment passes and the client
+signs off.
+
+### 6a. Switch the production branch to `main`
+
+1. Merge `dev` into `main` and push `main`.
+2. Pages project → Settings → **Builds & deployments** → change the production
+   branch to `main`.
+3. Create a new deploy hook for `main`, update `CROIX_BUILD_HOOK` in the CMS
+   `.env`, and run `vendor/bin/sake tasks:trigger-build`.
+4. Publish a CMS field and confirm the `main` deployment rebuilds and shows the
+   change.
+5. Re-run the §5 spot checks on the `main` `*.pages.dev` deployment.
+
+### 6b. Custom domain cutover
 
 1. Record the current DNS values and TTLs for **both** `www` and the apex
    (A/AAAA/CNAME targets, proxy status, TTL). This is the rollback baseline.
@@ -162,8 +176,11 @@ Then repeat the §5 spot checks on the real domain, including the contact form.
 
 ## 7. Rollback
 
-Two levels:
+Three levels:
 
+- **Bad branch switch:** switch the Pages production branch back to `dev`,
+  restore the `dev` deploy hook, and update `CROIX_BUILD_HOOK`. DNS is
+  unchanged.
 - **Bad build only:** Pages → Deployments → pick the last known-good deployment
   → **Rollback to this deployment**. Instant, no rebuild, DNS unchanged.
 - **Bad cutover:** restore the step-1 `www` and apex targets (Hostinger). The

@@ -70,9 +70,10 @@ command `npm run generate`, output `.output/public`, build variables
 Pages deploy hook. Full runbook, cutover, and rollback: `DEPLOY-CLOUDFLARE.md`.
 
 Deploy order: CMS first with `CROIX_BUILD_HOOK` empty (`../croix-cms/DEPLOY.md`),
-seed and smoke-check it, create this Pages project, then set the hook. Merge
-`feat/headless-cms` to `main` before creating the project: the Pages production
-branch is `main`, and deploy hooks are branch-scoped.
+seed and smoke-check it, create this Pages project on `dev`, then set the `dev`
+deploy hook. After staging sign-off, merge `dev` to `main`, switch the Pages
+production branch to `main`, and create a new hook for `main`; deploy hooks are
+branch-scoped, so update `CROIX_BUILD_HOOK` at the same time.
 
 ### Legacy: Hostinger static hosting (pre-cutover fallback)
 
